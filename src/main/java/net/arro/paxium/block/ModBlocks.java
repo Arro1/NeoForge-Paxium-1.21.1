@@ -32,6 +32,7 @@ public class ModBlocks {
                     .strength(40f)
                     .requiresCorrectToolForDrops()
                     .mapColor(MapColor.COLOR_BLACK)
+                    .lightLevel((state) -> 7)
                     .sound(SoundType.DEEPSLATE)));
 
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {

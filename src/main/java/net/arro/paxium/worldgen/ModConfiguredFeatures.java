@@ -21,7 +21,7 @@ public class ModConfiguredFeatures {
         RuleTest deepslateReplaceables = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
 
         register(context, OVERWORLD_DEEPSLATE_PAXIUM_ORE_KEY, Feature.ORE, new OreConfiguration(deepslateReplaceables,
-                ModBlocks.DEEPSLATE_PAXIUM_ORE.get().defaultBlockState(), 4));
+                ModBlocks.DEEPSLATE_PAXIUM_ORE.get().defaultBlockState(), 1));
     }
 
     public static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
