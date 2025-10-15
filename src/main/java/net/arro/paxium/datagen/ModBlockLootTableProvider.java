@@ -17,9 +17,10 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        // dropSelf(ModBlocks.MAGIC_BLOCK.get());
         add(ModBlocks.DEEPSLATE_PAXIUM_ORE.get(),
                 block -> createOreDrop(ModBlocks.DEEPSLATE_PAXIUM_ORE.get(), ModItems.RAW_PAXIUM.get()));
+
+        dropSelf(ModBlocks.STARFORGE.get());
 
     }
 

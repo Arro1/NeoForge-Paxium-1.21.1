@@ -20,10 +20,11 @@ public class ModCreativeModeTabs {
                     .icon(() -> new ItemStack(ModItems.PAXIUM.get()))
                     .title(Component.translatable("creativetab.paxium.paxium"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(ModItems.RAW_PAXIUM);
-                        output.accept(ModItems.PAXIUM);
-                        output.accept(ModBlocks.DEEPSLATE_PAXIUM_ORE);
+                        output.accept(ModItems.RAW_PAXIUM.get());
+                        output.accept(ModItems.PAXIUM.get());
+                        output.accept(ModBlocks.DEEPSLATE_PAXIUM_ORE.get());
 
+                        output.accept(ModBlocks.STARFORGE.get());
                     })
                     .build());
 

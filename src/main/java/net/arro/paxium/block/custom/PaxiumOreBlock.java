@@ -16,8 +16,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.util.Collections;
 import java.util.List;
 
-public class PaxiumOre extends DropExperienceBlock {
-    public PaxiumOre(IntProvider pXpRange, Properties pProperties) {
+public class PaxiumOreBlock extends DropExperienceBlock {
+    public PaxiumOreBlock(IntProvider pXpRange, Properties pProperties) {
         super(pXpRange, pProperties);
     }
 

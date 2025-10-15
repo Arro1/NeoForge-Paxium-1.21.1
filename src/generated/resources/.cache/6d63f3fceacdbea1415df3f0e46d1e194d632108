@@ -1,4 +1,8 @@
-// 1.21.1	2025-10-11T22:15:58.6593552	Block States: paxium
+// 1.21.1	2025-10-15T23:05:11.2518304	Block States: paxium
 f1060ff17bd1eea71fe4956382bcf30a3dada0c7 assets/paxium/blockstates/deepslate_paxium_ore.json
+7bb72667bdaf5f2d86ef24ac6e29c98de853ebaf assets/paxium/blockstates/starforge.json
 7ea67bbdf077436f4dacf94e622d1011a91c2228 assets/paxium/models/block/deepslate_paxium_ore.json
+143e71ce544e36af663248cf19a46b68815b865f assets/paxium/models/block/starforge.json
+8b35f974c291d26307b07c956c4ebca41ce73413 assets/paxium/models/block/starforge_on.json
 dea0c7aa4c1cf33c44b793b3a07523ec90e49e43 assets/paxium/models/item/deepslate_paxium_ore.json
+82005c62c7d44e570c13ddd4abec6e4bf3d708ba assets/paxium/models/item/starforge.json

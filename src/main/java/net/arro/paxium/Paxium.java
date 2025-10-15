@@ -1,9 +1,17 @@
 package net.arro.paxium;
 
 import net.arro.paxium.block.ModBlocks;
+import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModCreativeModeTabs;
 import net.arro.paxium.item.ModItems;
+import net.arro.paxium.screen.ModMenuTypes;
+import net.arro.paxium.screen.custom.StarforgeMenu;
+import net.arro.paxium.screen.custom.StarforgeScreen;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -42,10 +50,19 @@ public class Paxium {
         NeoForge.EVENT_BUS.register(this);
 
         ModCreativeModeTabs.register(modEventBus);
+
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
 
         ModEvents.register(NeoForge.EVENT_BUS);
+
+        ModBlockEntities.register(modEventBus);
+
+        ModMenuTypes.register(modEventBus);
+
+        if (FMLEnvironment.dist.isClient()) {
+            modEventBus.register(ClientModEvents.class);
+        }
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -76,5 +93,12 @@ public class Paxium {
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
         LOGGER.info("HELLO from server starting");
+    }
+
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
+        }
     }
 }
