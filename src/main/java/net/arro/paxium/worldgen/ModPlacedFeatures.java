@@ -22,10 +22,10 @@ public class ModPlacedFeatures {
 
         register(context, DEEPSLATE_PAXIUM_ORE_PLACED_KEY, configuredFeatures.getOrThrow(ModConfiguredFeatures.OVERWORLD_DEEPSLATE_PAXIUM_ORE_KEY),
                 ModOrePlacement.commonOrePlacement(
-                        10,
+                        1,
                         HeightRangePlacement.uniform(
-                                VerticalAnchor.absolute(-58),
-                                VerticalAnchor.absolute(-45)
+                                VerticalAnchor.absolute(-64),
+                                VerticalAnchor.absolute(-55)
                 )));
     }
 

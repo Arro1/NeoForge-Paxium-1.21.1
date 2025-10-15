@@ -1,18 +1,30 @@
 {
-  "type": "minecraft:ore",
+  "type": "minecraft:random_patch",
   "config": {
-    "discard_chance_on_air_exposure": 0.0,
-    "size": 1,
-    "targets": [
-      {
-        "state": {
-          "Name": "paxium:deepslate_paxium_ore"
-        },
-        "target": {
-          "predicate_type": "minecraft:tag_match",
-          "tag": "minecraft:deepslate_ore_replaceables"
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "config": {
+          "to_place": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+              "Name": "paxium:deepslate_paxium_ore"
+            }
+          }
         }
-      }
-    ]
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_block_tag",
+            "tag": "minecraft:deepslate_ore_replaceables"
+          }
+        }
+      ]
+    },
+    "tries": 1,
+    "xz_spread": 0,
+    "y_spread": 0
   }
 }

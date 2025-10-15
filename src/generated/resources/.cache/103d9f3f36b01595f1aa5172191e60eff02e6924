@@ -1,4 +1,4 @@
-// 1.21.1	2025-10-15T12:42:20.620381	Registries
+// 1.21.1	2025-10-15T17:35:55.8051035	Registries
 0d4e2cfc5be7969d2088cedbe5164b96c614f40d data/paxium/neoforge/biome_modifier/add_deepslate_paxium_ore.json
-a017a03cd226ca77c3e9965c8b4c511472c864f9 data/paxium/worldgen/configured_feature/deepslate_paxium_ore.json
-a2c7b3cd76e209d45f75573a73ba75991a56f8fb data/paxium/worldgen/placed_feature/deepslate_paxium_ore_placed.json
+a43ea0fdd907d2b75e7abea47a79a1316c9d423d data/paxium/worldgen/configured_feature/deepslate_paxium_ore.json
+2a6c97aa02315b62151c214fd2fdf6205fee87aa data/paxium/worldgen/placed_feature/deepslate_paxium_ore_placed.json
