@@ -5,8 +5,12 @@ import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.block.entity.StarforgeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -90,6 +94,30 @@ public class StarforgeBlock extends BaseEntityBlock {
         }
 
         return ItemInteractionResult.sidedSuccess(pLevel.isClientSide());
+    }
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        if (!state.getValue(LIT)) {
+            return;
+        }
+
+        double x = pos.getX() + 0.5;
+        double y = pos.getY();
+        double z = pos.getZ() + 0.5;
+
+        if (random.nextDouble() < 0.1) {
+            level.playLocalSound(x, y, z, SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+        }
+
+        Direction direction = state.getValue(FACING);
+        Direction.Axis axis = direction.getAxis();
+        double lateral = random.nextDouble() * 0.6 - 0.3;
+        double offsetX = axis == Direction.Axis.X ? direction.getStepX() * 0.52 : lateral;
+        double offsetZ = axis == Direction.Axis.Z ? direction.getStepZ() * 0.52 : lateral;
+        double offsetY = random.nextDouble() * 6.0 / 16.0;
+
+        level.addParticle(ParticleTypes.FLAME, x + offsetX, y + offsetY, z + offsetZ, 0.0, 0.0, 0.0);
     }
 
     @Nullable

@@ -2,6 +2,9 @@ package net.arro.paxium.block.entity;
 
 import net.arro.paxium.block.custom.StarforgeBlock;
 import net.arro.paxium.item.ModItems;
+import net.arro.paxium.recipe.ModRecipeTypes;
+import net.arro.paxium.recipe.StarforgeRecipe;
+import net.arro.paxium.recipe.StarforgeRecipeInput;
 import net.arro.paxium.screen.custom.StarforgeMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -17,18 +20,18 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class StarforgeBlockEntity extends BlockEntity implements MenuProvider {
     private static final int INPUT_SLOT = 0;
@@ -163,7 +166,12 @@ public class StarforgeBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private void craftItem() {
-        ItemStack output = new ItemStack(ModItems.PAXIUM.get(), 1);
+        Optional<RecipeHolder<StarforgeRecipe>> recipe = getCurrentRecipe();
+        if (recipe.isEmpty()) {
+            return;
+        }
+
+        ItemStack output = recipe.get().value().assemble(getRecipeInput(), level.registryAccess());
 
         itemHandler.extractItem(INPUT_SLOT, 1, false);
         itemHandler.extractItem(INPUT_BREATH_SLOT, 1, false);
@@ -185,13 +193,24 @@ public class StarforgeBlockEntity extends BlockEntity implements MenuProvider {
         progress++;
     }
 
-    private boolean hasRecipe() {
-        ItemStack output = new ItemStack(ModItems.PAXIUM.get(), 1);
+    private StarforgeRecipeInput getRecipeInput() {
+        return new StarforgeRecipeInput(itemHandler.getStackInSlot(INPUT_SLOT),
+                itemHandler.getStackInSlot(INPUT_BREATH_SLOT), itemHandler.getStackInSlot(INPUT_STAR_SLOT));
+    }
 
-        return itemHandler.getStackInSlot(INPUT_SLOT).is(ModItems.RAW_PAXIUM) &&
-                itemHandler.getStackInSlot(INPUT_BREATH_SLOT).is(Items.DRAGON_BREATH) &&
-                itemHandler.getStackInSlot(INPUT_STAR_SLOT).is(Items.NETHER_STAR) &&
-                canInsertAmountIntoOutputSlot(output.getCount()) && canInsertItemIntoOutputSlot(output);
+    private Optional<RecipeHolder<StarforgeRecipe>> getCurrentRecipe() {
+        return level.getRecipeManager().getRecipeFor(ModRecipeTypes.STARFORGING.get(), getRecipeInput(), level);
+    }
+
+    private boolean hasRecipe() {
+        Optional<RecipeHolder<StarforgeRecipe>> recipe = getCurrentRecipe();
+        if (recipe.isEmpty()) {
+            return false;
+        }
+
+        ItemStack output = recipe.get().value().getResultItem(level.registryAccess());
+
+        return canInsertAmountIntoOutputSlot(output.getCount()) && canInsertItemIntoOutputSlot(output);
     }
 
     private boolean canInsertItemIntoOutputSlot(ItemStack output) {

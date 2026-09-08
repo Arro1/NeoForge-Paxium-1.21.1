@@ -5,6 +5,8 @@ import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModCreativeModeTabs;
 import net.arro.paxium.item.ModItems;
+import net.arro.paxium.recipe.ModRecipeSerializers;
+import net.arro.paxium.recipe.ModRecipeTypes;
 import net.arro.paxium.screen.ModMenuTypes;
 import net.arro.paxium.screen.custom.StarforgeMenu;
 import net.arro.paxium.screen.custom.StarforgeScreen;
@@ -59,6 +61,9 @@ public class Paxium {
         ModBlockEntities.register(modEventBus);
 
         ModMenuTypes.register(modEventBus);
+
+        ModRecipeTypes.register(modEventBus);
+        ModRecipeSerializers.register(modEventBus);
 
         if (FMLEnvironment.dist.isClient()) {
             modEventBus.register(ClientModEvents.class);

@@ -1,0 +1,16 @@
+{
+  "type": "paxium:starforging",
+  "dragon_breath": {
+    "item": "minecraft:dragon_breath"
+  },
+  "nether_star": {
+    "item": "minecraft:nether_star"
+  },
+  "paxium": {
+    "item": "paxium:raw_paxium"
+  },
+  "result": {
+    "count": 1,
+    "id": "paxium:paxium"
+  }
+}
