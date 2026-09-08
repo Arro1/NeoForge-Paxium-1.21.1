@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 270
+    },
+    "facing=east,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 270
+    },
+    "facing=north,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 180
+    },
+    "facing=north,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 180
+    },
+    "facing=south,lit=false": {
+      "model": "paxium:block/starforge"
+    },
+    "facing=south,lit=true": {
+      "model": "paxium:block/starforge_on"
+    },
+    "facing=west,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 90
+    },
+    "facing=west,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 90
+    }
+  }
+}

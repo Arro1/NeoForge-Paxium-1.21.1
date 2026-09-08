@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "paxium:block/starforge_front",
+    "side": "paxium:block/starforge_side",
+    "top": "paxium:block/starforge_top"
+  }
+}
