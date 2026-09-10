@@ -1,8 +1,11 @@
 package net.arro.paxium.item;
 
 import net.arro.paxium.Paxium;
+import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Tiers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -27,6 +30,11 @@ public class ModItems {
     public static final DeferredItem<ArmorItem> PAXIUM_BOOTS = ITEMS.register("paxium_boots",
             () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.BOOTS,
                     new Item.Properties().fireResistant().durability(ArmorItem.Type.BOOTS.getDurability(50))));
+
+    // Total attack damage = 1 (base) + 5 (this bonus) + 4 (netherite tier bonus) = 10.
+    public static final DeferredItem<PaxiumSwordItem> PAXIUM_SWORD = ITEMS.register("paxium_sword",
+            () -> new PaxiumSwordItem(Tiers.NETHERITE, new Item.Properties().fireResistant()
+                    .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 5, -2.4F))));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

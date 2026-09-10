@@ -53,5 +53,9 @@ public class ModItemTagProvider extends ItemTagsProvider {
                 .add(ModItems.PAXIUM_CHESTPLATE.get())
                 .add(ModItems.PAXIUM_LEGGINGS.get())
                 .add(ModItems.PAXIUM_BOOTS.get());
+
+        // Membership grants enchantable/sword, enchantable/sharp_weapon, enchantable/weapon,
+        // enchantable/fire_aspect, enchantable/durability and enchantable/vanishing transitively.
+        tag(ItemTags.SWORDS).add(ModItems.PAXIUM_SWORD.get());
     }
 }

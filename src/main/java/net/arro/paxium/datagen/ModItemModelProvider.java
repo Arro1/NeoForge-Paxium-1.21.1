@@ -20,5 +20,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.PAXIUM_CHESTPLATE.get());
         basicItem(ModItems.PAXIUM_LEGGINGS.get());
         basicItem(ModItems.PAXIUM_BOOTS.get());
+
+        handheldItem(ModItems.PAXIUM_SWORD.get());
     }
 }

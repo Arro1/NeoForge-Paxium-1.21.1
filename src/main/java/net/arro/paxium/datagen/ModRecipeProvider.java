@@ -52,6 +52,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
         smithingUpgrade(recipeOutput, Items.NETHERITE_CHESTPLATE, ModItems.PAXIUM_CHESTPLATE.get(), "paxium_chestplate_smithing");
         smithingUpgrade(recipeOutput, Items.NETHERITE_LEGGINGS, ModItems.PAXIUM_LEGGINGS.get(), "paxium_leggings_smithing");
         smithingUpgrade(recipeOutput, Items.NETHERITE_BOOTS, ModItems.PAXIUM_BOOTS.get(), "paxium_boots_smithing");
+        smithingUpgrade(recipeOutput, Items.NETHERITE_SWORD, ModItems.PAXIUM_SWORD.get(), "paxium_sword_smithing");
     }
 
     private void smithingUpgrade(RecipeOutput recipeOutput, Item base, Item result, String recipeId) {

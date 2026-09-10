@@ -1,5 +1,7 @@
 package net.arro.paxium;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
@@ -7,6 +9,7 @@ import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.ModCreativeModeTabs;
 import net.arro.paxium.item.ModItems;
+import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.arro.paxium.recipe.ModRecipeSerializers;
 import net.arro.paxium.recipe.ModRecipeTypes;
 import net.arro.paxium.screen.ModMenuTypes;
@@ -16,13 +19,18 @@ import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.slf4j.Logger;
 
@@ -126,6 +134,28 @@ public class Paxium {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
+        }
+
+        // The vanilla SPEAR use-pose (trident wind-up) translates the item wildly upward/back and looks
+        // broken on a sword - replace the first-person hand pose entirely with a gentle forward tilt.
+        @SubscribeEvent
+        public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+            event.registerItem(new IClientItemExtensions() {
+                @Override
+                public boolean applyForgeHandTransform(PoseStack poseStack, LocalPlayer player, HumanoidArm arm,
+                                                         ItemStack itemInHand, float partialTick, float equipProcess, float swingProcess) {
+                    if (!(player.isUsingItem() && player.getUseItem().getItem() instanceof PaxiumSwordItem)) {
+                        return false;
+                    }
+
+                    int side = arm == HumanoidArm.RIGHT ? 1 : -1;
+                    // Same base "held in hand" offset vanilla applies before any use-animation extras.
+                    poseStack.translate(side * 0.56F, -0.52F + equipProcess * -0.6F, -0.72F);
+                    // Tilt the tip forward/down instead of SPEAR's exaggerated pull-back.
+                    poseStack.mulPose(Axis.XP.rotationDegrees(-20.0F));
+                    return true;
+                }
+            }, ModItems.PAXIUM_SWORD.get());
         }
 
         @SubscribeEvent

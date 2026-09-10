@@ -3,22 +3,31 @@ package net.arro.paxium.event;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.item.ModArmorMaterials;
+import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.arro.paxium.util.ModTags;
 import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
@@ -39,6 +48,10 @@ public class ModEvents {
     // Players who flew and haven't touched the ground since - fuel stays frozen mid-fall until they land.
     private static final Set<UUID> AWAITING_LANDING = new HashSet<>();
 
+    private static final double FIRE_BEAM_RANGE = 20.0;
+    private static final int FIRE_BEAM_FUEL_PER_TICK = 2;
+    private static final float FIRE_BEAM_DAMAGE = 6.0F;
+
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
@@ -47,7 +60,14 @@ public class ModEvents {
             return;
         }
 
-        if (player.isCreative() || player.isSpectator()) {
+        if (player.isSpectator()) {
+            return;
+        }
+
+        if (player.isCreative()) {
+            // Creative already has free flight/immortality; only the beam matters here, and it
+            // should fire indefinitely without touching the fuel meter at all.
+            updateFireBeamCreative(player);
             return;
         }
 
@@ -55,11 +75,14 @@ public class ModEvents {
             if (player.getRemainingFireTicks() > 0) {
                 player.clearFire();
             }
-            updateFlight(player);
+            boolean channelingBeam = isChannelingFireBeam(player);
+            updateFlight(player, channelingBeam);
+            updateFireBeam(player, channelingBeam);
             return;
         }
 
         setFlightAllowed(player, false);
+        stopFireBeamIfChanneling(player);
 
         for (ItemStack stack : player.getInventory().items) {
             if (stack.is(ModTags.Items.HOT_ITEMS)) {
@@ -71,7 +94,7 @@ public class ModEvents {
         }
     }
 
-    private static void updateFlight(Player player) {
+    private static void updateFlight(Player player, boolean channelingBeam) {
         int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
         int updatedFuel = fuel;
 
@@ -84,7 +107,11 @@ public class ModEvents {
             // Still falling after flight ended - hold off on regenerating until they land.
         } else {
             AWAITING_LANDING.remove(id);
-            updatedFuel = Math.min(ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS, fuel + 1);
+            // Don't passively regenerate while the beam is actively draining the same pool this
+            // tick - otherwise the two fight each other and the meter never settles at 0.
+            if (!channelingBeam) {
+                updatedFuel = Math.min(ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS, fuel + 1);
+            }
         }
 
         if (updatedFuel != fuel) {
@@ -105,6 +132,98 @@ public class ModEvents {
         } else {
             flight.removeModifier(FLIGHT_MODIFIER_ID);
         }
+    }
+
+    private static boolean isChannelingFireBeam(Player player) {
+        return player.isUsingItem() && player.getUseItem().getItem() instanceof PaxiumSwordItem;
+    }
+
+    private static void stopFireBeamIfChanneling(Player player) {
+        if (isChannelingFireBeam(player)) {
+            player.stopUsingItem();
+        }
+    }
+
+    private static void updateFireBeamCreative(Player player) {
+        if (!isChannelingFireBeam(player)) {
+            return;
+        }
+
+        if (!PaxiumArmor.hasFullSet(player)) {
+            player.stopUsingItem();
+            return;
+        }
+
+        // No fuel read/write at all - indefinite beam in creative.
+        fireBeamTick(player);
+    }
+
+    private static void updateFireBeam(Player player, boolean channeling) {
+        if (!channeling) {
+            return;
+        }
+
+        int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
+        if (fuel <= 0) {
+            player.stopUsingItem();
+            return;
+        }
+
+        player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), Math.max(0, fuel - FIRE_BEAM_FUEL_PER_TICK));
+        fireBeamTick(player);
+    }
+
+    private static void fireBeamTick(Player player) {
+        ServerLevel level = (ServerLevel) player.level();
+
+        Vec3 start = player.getEyePosition();
+        Vec3 aim = player.getViewVector(1.0F);
+        Vec3 end = start.add(aim.scale(FIRE_BEAM_RANGE));
+
+        BlockHitResult blockHit = level.clip(
+                new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        if (blockHit.getType() == HitResult.Type.BLOCK) {
+            end = blockHit.getLocation();
+        }
+
+        AABB sweep = new AABB(start, end).inflate(1.0);
+        for (Entity candidate : level.getEntities(player, sweep, e -> e instanceof LivingEntity living && living.isAlive())) {
+            if (candidate.getBoundingBox().clip(start, end).isPresent()) {
+                LivingEntity target = (LivingEntity) candidate;
+                boolean damaged = target.hurt(level.damageSources().playerAttack(player), FIRE_BEAM_DAMAGE);
+                target.igniteForSeconds(PaxiumSwordItem.IGNITE_SECONDS);
+                if (damaged) {
+                    level.playSound(null, target.getX(), target.getY(), target.getZ(),
+                            SoundEvents.GENERIC_BURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+                }
+            }
+        }
+
+        spawnBeamParticles(level, start, aim, end);
+    }
+
+    private static void spawnBeamParticles(ServerLevel level, Vec3 start, Vec3 aim, Vec3 end) {
+        RandomSource random = level.random;
+
+        Vec3 trailStart = start.add(aim.scale(1.0));
+        double length = trailStart.distanceTo(end);
+        int steps = Math.max(1, (int) (length / 0.5));
+
+        for (int i = 0; i <= steps; i++) {
+            Vec3 point = trailStart.lerp(end, (double) i / steps);
+            double jitter = 0.08;
+            double x = point.x + (random.nextDouble() - 0.5) * jitter;
+            double y = point.y + (random.nextDouble() - 0.5) * jitter;
+            double z = point.z + (random.nextDouble() - 0.5) * jitter;
+
+            level.sendParticles(ParticleTypes.SMALL_FLAME, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
+            if (random.nextInt(4) == 0) {
+                level.sendParticles(ParticleTypes.FLAME, x, y, z, 1, 0.02, 0.02, 0.02, 0.01);
+            }
+        }
+
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, end.x, end.y, end.z, 2, 0.15, 0.15, 0.15, 0.01);
+        level.sendParticles(ParticleTypes.FLASH, end.x, end.y, end.z, 1, 0.0, 0.0, 0.0, 0.0);
     }
 
     @SubscribeEvent
@@ -153,6 +272,13 @@ public class ModEvents {
             // If it does, add a new line of text to its tooltip
             event.getToolTip().add(Component.literal("Dangerously Hot!")
                     .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
+        }
+
+        if (stack.getItem() instanceof PaxiumSwordItem) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.sword_ignite")
+                    .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+            event.getToolTip().add(Component.translatable("tooltip.paxium.sword_fire_beam")
+                    .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         }
 
         if (stack.getItem() instanceof ArmorItem armorItem && armorItem.getMaterial() == ModArmorMaterials.PAXIUM) {

@@ -30,6 +30,7 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.PAXIUM_CHESTPLATE.get());
                         output.accept(ModItems.PAXIUM_LEGGINGS.get());
                         output.accept(ModItems.PAXIUM_BOOTS.get());
+                        output.accept(ModItems.PAXIUM_SWORD.get());
                     })
                     .build());
 

@@ -6,9 +6,12 @@
   "item.paxium.paxium_chestplate": "Paxium Chestplate",
   "item.paxium.paxium_leggings": "Paxium Leggings",
   "item.paxium.paxium_boots": "Paxium Boots",
+  "item.paxium.paxium_sword": "Paxium Sword",
 
   "tooltip.paxium.fire_immunity_set_bonus": "Full set bonus: Immunity to fire and lava",
   "tooltip.paxium.flight_set_bonus": "Full set bonus: Limited flight (recharges while grounded)",
+  "tooltip.paxium.sword_ignite": "Sets enemies ablaze on hit",
+  "tooltip.paxium.sword_fire_beam": "Full set: Hold right-click to channel a fire beam (uses flight fuel)",
 
   "block.paxium.deepslate_paxium_ore": "Deepslate Paxium Ore",
   "block.paxium.starforge": "Starforge",
