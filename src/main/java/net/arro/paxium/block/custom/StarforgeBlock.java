@@ -118,6 +118,21 @@ public class StarforgeBlock extends BaseEntityBlock {
         double offsetY = random.nextDouble() * 6.0 / 16.0;
 
         level.addParticle(ParticleTypes.FLAME, x + offsetX, y + offsetY, z + offsetZ, 0.0, 0.0, 0.0);
+
+        // Bright motes drifting up out of the forge, like a small star burning inside it.
+        if (random.nextDouble() < 0.5) {
+            double starX = x + (random.nextDouble() - 0.5) * 0.8;
+            double starZ = z + (random.nextDouble() - 0.5) * 0.8;
+            double riseSpeed = 0.02 + random.nextDouble() * 0.02;
+            level.addParticle(ParticleTypes.END_ROD, starX, y + 0.2, starZ, 0.0, riseSpeed, 0.0);
+        }
+
+        if (random.nextDouble() < 0.2) {
+            double glowX = x + (random.nextDouble() - 0.5) * 0.6;
+            double glowZ = z + (random.nextDouble() - 0.5) * 0.6;
+            double glowY = y + 0.3 + random.nextDouble() * 0.5;
+            level.addParticle(ParticleTypes.GLOW, glowX, glowY, glowZ, 0.0, 0.0, 0.0);
+        }
     }
 
     @Nullable

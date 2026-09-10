@@ -48,7 +48,8 @@ public class ModBlocks {
             () -> new StarforgeBlock(BlockBehaviour.Properties.of()
                     .strength(30f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.ANVIL)),
+                    .sound(SoundType.ANVIL)
+                    .lightLevel((state) -> state.getValue(StarforgeBlock.LIT) ? 15 : 0)),
             (block) -> new StarforgeBlockItem(block.get(), new Item.Properties())
     );
 
