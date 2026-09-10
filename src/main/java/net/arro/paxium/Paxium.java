@@ -3,6 +3,7 @@ package net.arro.paxium;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.event.ModEvents;
+import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.ModCreativeModeTabs;
 import net.arro.paxium.item.ModItems;
 import net.arro.paxium.recipe.ModRecipeSerializers;
@@ -53,6 +54,7 @@ public class Paxium {
 
         ModCreativeModeTabs.register(modEventBus);
 
+        ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
 

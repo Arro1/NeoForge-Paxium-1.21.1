@@ -16,5 +16,9 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.RAW_PAXIUM.get());
         basicItem(ModItems.PAXIUM.get());
 
+        basicItem(ModItems.PAXIUM_HELMET.get());
+        basicItem(ModItems.PAXIUM_CHESTPLATE.get());
+        basicItem(ModItems.PAXIUM_LEGGINGS.get());
+        basicItem(ModItems.PAXIUM_BOOTS.get());
     }
 }

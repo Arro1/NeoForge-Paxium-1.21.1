@@ -7,6 +7,7 @@ import net.arro.paxium.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
@@ -21,5 +22,36 @@ public class ModItemTagProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
+        tag(ItemTags.TRIMMABLE_ARMOR)
+                .add(ModItems.PAXIUM_HELMET.get())
+                .add(ModItems.PAXIUM_CHESTPLATE.get())
+                .add(ModItems.PAXIUM_LEGGINGS.get())
+                .add(ModItems.PAXIUM_BOOTS.get());
+
+        tag(ItemTags.ARMOR_ENCHANTABLE)
+                .add(ModItems.PAXIUM_HELMET.get())
+                .add(ModItems.PAXIUM_CHESTPLATE.get())
+                .add(ModItems.PAXIUM_LEGGINGS.get())
+                .add(ModItems.PAXIUM_BOOTS.get());
+        tag(ItemTags.HEAD_ARMOR_ENCHANTABLE).add(ModItems.PAXIUM_HELMET.get());
+        tag(ItemTags.CHEST_ARMOR_ENCHANTABLE).add(ModItems.PAXIUM_CHESTPLATE.get());
+        tag(ItemTags.LEG_ARMOR_ENCHANTABLE).add(ModItems.PAXIUM_LEGGINGS.get());
+        tag(ItemTags.FOOT_ARMOR_ENCHANTABLE).add(ModItems.PAXIUM_BOOTS.get());
+
+        tag(ItemTags.EQUIPPABLE_ENCHANTABLE)
+                .add(ModItems.PAXIUM_HELMET.get())
+                .add(ModItems.PAXIUM_CHESTPLATE.get())
+                .add(ModItems.PAXIUM_LEGGINGS.get())
+                .add(ModItems.PAXIUM_BOOTS.get());
+        tag(ItemTags.DURABILITY_ENCHANTABLE)
+                .add(ModItems.PAXIUM_HELMET.get())
+                .add(ModItems.PAXIUM_CHESTPLATE.get())
+                .add(ModItems.PAXIUM_LEGGINGS.get())
+                .add(ModItems.PAXIUM_BOOTS.get());
+        tag(ItemTags.VANISHING_ENCHANTABLE)
+                .add(ModItems.PAXIUM_HELMET.get())
+                .add(ModItems.PAXIUM_CHESTPLATE.get())
+                .add(ModItems.PAXIUM_LEGGINGS.get())
+                .add(ModItems.PAXIUM_BOOTS.get());
     }
 }

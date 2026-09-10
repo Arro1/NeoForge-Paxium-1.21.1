@@ -10,7 +10,9 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -45,5 +47,21 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                         Ingredient.of(Items.NETHER_STAR),
                         new ItemStack(ModItems.PAXIUM.get())),
                 null);
+
+        smithingUpgrade(recipeOutput, Items.NETHERITE_HELMET, ModItems.PAXIUM_HELMET.get(), "paxium_helmet_smithing");
+        smithingUpgrade(recipeOutput, Items.NETHERITE_CHESTPLATE, ModItems.PAXIUM_CHESTPLATE.get(), "paxium_chestplate_smithing");
+        smithingUpgrade(recipeOutput, Items.NETHERITE_LEGGINGS, ModItems.PAXIUM_LEGGINGS.get(), "paxium_leggings_smithing");
+        smithingUpgrade(recipeOutput, Items.NETHERITE_BOOTS, ModItems.PAXIUM_BOOTS.get(), "paxium_boots_smithing");
+    }
+
+    private void smithingUpgrade(RecipeOutput recipeOutput, Item base, Item result, String recipeId) {
+        SmithingTransformRecipeBuilder.smithing(
+                        Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                        Ingredient.of(base),
+                        Ingredient.of(ModItems.PAXIUM.get()),
+                        RecipeCategory.COMBAT,
+                        result)
+                .unlocks("has_paxium", has(ModItems.PAXIUM))
+                .save(recipeOutput, ResourceLocation.fromNamespaceAndPath(Paxium.MODID, recipeId));
     }
 }

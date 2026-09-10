@@ -1,6 +1,7 @@
 package net.arro.paxium.item;
 
 import net.arro.paxium.Paxium;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -13,6 +14,19 @@ public class ModItems {
             () -> new Item(new Item.Properties()));
     public static final DeferredItem<Item> PAXIUM = ITEMS.register("paxium",
             () -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<ArmorItem> PAXIUM_HELMET = ITEMS.register("paxium_helmet",
+            () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.HELMET,
+                    new Item.Properties().fireResistant().durability(ArmorItem.Type.HELMET.getDurability(50))));
+    public static final DeferredItem<ArmorItem> PAXIUM_CHESTPLATE = ITEMS.register("paxium_chestplate",
+            () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.CHESTPLATE,
+                    new Item.Properties().fireResistant().durability(ArmorItem.Type.CHESTPLATE.getDurability(50))));
+    public static final DeferredItem<ArmorItem> PAXIUM_LEGGINGS = ITEMS.register("paxium_leggings",
+            () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.LEGGINGS,
+                    new Item.Properties().fireResistant().durability(ArmorItem.Type.LEGGINGS.getDurability(50))));
+    public static final DeferredItem<ArmorItem> PAXIUM_BOOTS = ITEMS.register("paxium_boots",
+            () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.BOOTS,
+                    new Item.Properties().fireResistant().durability(ArmorItem.Type.BOOTS.getDurability(50))));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

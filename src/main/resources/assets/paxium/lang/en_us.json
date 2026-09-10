@@ -2,6 +2,13 @@
   "item.paxium.raw_paxium" : "Raw Paxium",
   "item.paxium.paxium" : "Paxium",
 
+  "item.paxium.paxium_helmet": "Paxium Helmet",
+  "item.paxium.paxium_chestplate": "Paxium Chestplate",
+  "item.paxium.paxium_leggings": "Paxium Leggings",
+  "item.paxium.paxium_boots": "Paxium Boots",
+
+  "tooltip.paxium.fire_immunity_set_bonus": "Full set bonus: Immunity to fire and lava",
+
   "block.paxium.deepslate_paxium_ore": "Deepslate Paxium Ore",
   "block.paxium.starforge": "Starforge",
 

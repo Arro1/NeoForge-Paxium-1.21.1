@@ -25,6 +25,11 @@ public class ModCreativeModeTabs {
                         output.accept(ModBlocks.DEEPSLATE_PAXIUM_ORE.get());
 
                         output.accept(ModBlocks.STARFORGE.get());
+
+                        output.accept(ModItems.PAXIUM_HELMET.get());
+                        output.accept(ModItems.PAXIUM_CHESTPLATE.get());
+                        output.accept(ModItems.PAXIUM_LEGGINGS.get());
+                        output.accept(ModItems.PAXIUM_BOOTS.get());
                     })
                     .build());
 

@@ -1,1 +1,10 @@
-// 1.21.1	2025-10-11T22:15:58.6543601	Tags for minecraft:item mod id paxium
+// 1.21.1	2026-09-10T20:20:35.5363957	Tags for minecraft:item mod id paxium
+89a8eeb2129ed92fb05d4e6811d62b2bc320fb87 data/minecraft/tags/item/enchantable/armor.json
+0355c883b0d0c46437b81358005e010ee7dae73f data/minecraft/tags/item/enchantable/chest_armor.json
+89a8eeb2129ed92fb05d4e6811d62b2bc320fb87 data/minecraft/tags/item/enchantable/durability.json
+89a8eeb2129ed92fb05d4e6811d62b2bc320fb87 data/minecraft/tags/item/enchantable/equippable.json
+cce6e5fbf68a358a62b6a61ea825c3acc9767585 data/minecraft/tags/item/enchantable/foot_armor.json
+8e3c0bd091fe1a94847c60697b32e65c3328ab7a data/minecraft/tags/item/enchantable/head_armor.json
+2184c7f6daaeeea0954c1e0fcbf777b89915c2b4 data/minecraft/tags/item/enchantable/leg_armor.json
+89a8eeb2129ed92fb05d4e6811d62b2bc320fb87 data/minecraft/tags/item/enchantable/vanishing.json
+89a8eeb2129ed92fb05d4e6811d62b2bc320fb87 data/minecraft/tags/item/trimmable_armor.json
