@@ -15,6 +15,7 @@ import net.arro.paxium.screen.custom.StarforgeScreen;
 import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -118,6 +119,10 @@ public class Paxium {
         private static final ResourceLocation FLIGHT_FUEL_BAR_PROGRESS_SPRITE =
                 ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
 
+        // How far to push the XP bar / health / armor / food / air / etc. up, to make
+        // room for the flight fuel bar directly above the hotbar.
+        private static final float HUD_SHIFT_PX = 9.0F;
+
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
@@ -125,27 +130,56 @@ public class Paxium {
 
         @SubscribeEvent
         public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+            event.wrapLayer(VanillaGuiLayers.EXPERIENCE_BAR, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.JUMP_METER, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.PLAYER_HEALTH, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.ARMOR_LEVEL, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.FOOD_LEVEL, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.VEHICLE_HEALTH, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.AIR_LEVEL, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.SELECTED_ITEM_NAME, ClientModEvents::shiftedUp);
+            event.wrapLayer(VanillaGuiLayers.EXPERIENCE_LEVEL, ClientModEvents::shiftedUp);
+
             event.registerAbove(
                     VanillaGuiLayers.AIR_LEVEL,
                     ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "flight_fuel_bar"),
                     (guiGraphics, deltaTracker) -> renderFlightFuelBar(guiGraphics));
         }
 
-        private static void renderFlightFuelBar(GuiGraphics guiGraphics) {
+        private static LayeredDraw.Layer shiftedUp(LayeredDraw.Layer original) {
+            return (guiGraphics, deltaTracker) -> {
+                if (isFlightFuelBarShown()) {
+                    guiGraphics.pose().pushPose();
+                    guiGraphics.pose().translate(0.0F, -HUD_SHIFT_PX, 0.0F);
+                    original.render(guiGraphics, deltaTracker);
+                    guiGraphics.pose().popPose();
+                } else {
+                    original.render(guiGraphics, deltaTracker);
+                }
+            };
+        }
+
+        private static boolean isFlightFuelBarShown() {
             Player player = Minecraft.getInstance().player;
-            if (player == null || !PaxiumArmor.hasFullSet(player)) {
+            return player != null && PaxiumArmor.hasFullSet(player);
+        }
+
+        private static void renderFlightFuelBar(GuiGraphics guiGraphics) {
+            if (!isFlightFuelBarShown()) {
                 return;
             }
 
+            Player player = Minecraft.getInstance().player;
             int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
             int filledWidth = Math.round((float) fuel / ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS * 182.0F);
 
-            int x = guiGraphics.guiWidth() - 10 - 182;
+            int x = guiGraphics.guiWidth() / 2 - 91;
             int y = guiGraphics.guiHeight() - 30;
 
             guiGraphics.setColor(1.0F, 0.5F, 0.0F, 1.0F);
             guiGraphics.blitSprite(FLIGHT_FUEL_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
             if (filledWidth > 0) {
+                guiGraphics.setColor(1.0F, 0.65F, 0.05F, 1.0F);
                 guiGraphics.blitSprite(FLIGHT_FUEL_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
             }
             guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
