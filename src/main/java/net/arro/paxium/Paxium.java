@@ -1,5 +1,6 @@
 package net.arro.paxium;
 
+import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.event.ModEvents;
@@ -11,10 +12,17 @@ import net.arro.paxium.recipe.ModRecipeTypes;
 import net.arro.paxium.screen.ModMenuTypes;
 import net.arro.paxium.screen.custom.StarforgeMenu;
 import net.arro.paxium.screen.custom.StarforgeScreen;
+import net.arro.paxium.util.PaxiumArmor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -62,6 +70,8 @@ public class Paxium {
 
         ModBlockEntities.register(modEventBus);
 
+        ModAttachmentTypes.register(modEventBus);
+
         ModMenuTypes.register(modEventBus);
 
         ModRecipeTypes.register(modEventBus);
@@ -103,9 +113,42 @@ public class Paxium {
     }
 
     public static class ClientModEvents {
+        private static final ResourceLocation FLIGHT_FUEL_BAR_BACKGROUND_SPRITE =
+                ResourceLocation.withDefaultNamespace("hud/experience_bar_background");
+        private static final ResourceLocation FLIGHT_FUEL_BAR_PROGRESS_SPRITE =
+                ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
+
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
+        }
+
+        @SubscribeEvent
+        public static void registerGuiLayers(RegisterGuiLayersEvent event) {
+            event.registerAbove(
+                    VanillaGuiLayers.AIR_LEVEL,
+                    ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "flight_fuel_bar"),
+                    (guiGraphics, deltaTracker) -> renderFlightFuelBar(guiGraphics));
+        }
+
+        private static void renderFlightFuelBar(GuiGraphics guiGraphics) {
+            Player player = Minecraft.getInstance().player;
+            if (player == null || !PaxiumArmor.hasFullSet(player)) {
+                return;
+            }
+
+            int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
+            int filledWidth = Math.round((float) fuel / ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS * 182.0F);
+
+            int x = guiGraphics.guiWidth() - 10 - 182;
+            int y = guiGraphics.guiHeight() - 30;
+
+            guiGraphics.setColor(1.0F, 0.5F, 0.0F, 1.0F);
+            guiGraphics.blitSprite(FLIGHT_FUEL_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
+            if (filledWidth > 0) {
+                guiGraphics.blitSprite(FLIGHT_FUEL_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
+            }
+            guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }

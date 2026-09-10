@@ -8,6 +8,7 @@
   "item.paxium.paxium_boots": "Paxium Boots",
 
   "tooltip.paxium.fire_immunity_set_bonus": "Full set bonus: Immunity to fire and lava",
+  "tooltip.paxium.flight_set_bonus": "Full set bonus: Limited flight (recharges while grounded)",
 
   "block.paxium.deepslate_paxium_ore": "Deepslate Paxium Ore",
   "block.paxium.starforge": "Starforge",
