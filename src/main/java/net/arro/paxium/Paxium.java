@@ -5,6 +5,8 @@ import com.mojang.math.Axis;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
+import net.arro.paxium.entity.ModEntities;
+import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
 import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.ModCreativeModeTabs;
@@ -20,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -44,6 +48,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -78,6 +83,8 @@ public class Paxium {
         ModEvents.register(NeoForge.EVENT_BUS);
 
         ModBlockEntities.register(modEventBus);
+
+        ModEntities.register(modEventBus);
 
         ModAttachmentTypes.register(modEventBus);
 
@@ -134,6 +141,31 @@ public class Paxium {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
+        }
+
+        @SubscribeEvent
+        public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(ModEntities.PAXIUM_FIRE_BURST.get(), PaxiumFireBurstRenderer::new);
+        }
+
+        // Vanilla only wires the "pulling"/"pull" item-property functions to the literal Items.BOW
+        // instance (see ItemProperties.register calls in vanilla), not to every BowItem subclass -
+        // without this, the paxium_bow.json overrides never fire and the draw animation never swaps.
+        @SubscribeEvent
+        public static void clientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                ItemProperties.register(ModItems.PAXIUM_BOW.get(), ResourceLocation.withDefaultNamespace("pull"),
+                        (stack, level, entity, seed) -> {
+                            if (entity == null) {
+                                return 0.0F;
+                            }
+                            return entity.getUseItem() != stack ? 0.0F
+                                    : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20.0F;
+                        });
+                ItemProperties.register(ModItems.PAXIUM_BOW.get(), ResourceLocation.withDefaultNamespace("pulling"),
+                        (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack
+                                ? 1.0F : 0.0F);
+            });
         }
 
         // The vanilla SPEAR use-pose (trident wind-up) translates the item wildly upward/back and looks

@@ -3,6 +3,7 @@ package net.arro.paxium.event;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.item.ModArmorMaterials;
+import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.arro.paxium.util.ModTags;
 import net.arro.paxium.util.PaxiumArmor;
@@ -278,6 +279,11 @@ public class ModEvents {
             event.getToolTip().add(Component.translatable("tooltip.paxium.sword_ignite")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
             event.getToolTip().add(Component.translatable("tooltip.paxium.sword_fire_beam")
+                    .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+        }
+
+        if (stack.getItem() instanceof PaxiumBowItem) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.bow_fire_burst")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         }
 

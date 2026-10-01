@@ -1,11 +1,13 @@
-// 1.21.1	2026-09-10T22:48:05.7391396	Recipes
+// 1.21.1	2026-10-01T19:12:02.2369999	Recipes
 3d8a2313f5bf847c3fd9eb0663494edf6b9506a3 data/paxium/advancement/recipes/combat/paxium_boots_smithing.json
+d73329b53306890d3036a05488fb9e97b1570011 data/paxium/advancement/recipes/combat/paxium_bow_smithing.json
 8989aaed00fa60227a3dd2c4e20bf73282399f34 data/paxium/advancement/recipes/combat/paxium_chestplate_smithing.json
 2805d2c4cd703367b1073dee67ebee7f085ee355 data/paxium/advancement/recipes/combat/paxium_helmet_smithing.json
 6f7f4fa36193600243d2ee2ac6c39861d372ea42 data/paxium/advancement/recipes/combat/paxium_leggings_smithing.json
 ba7fa12fc4deb3ab4d352fcaaeffcb3608aabf05 data/paxium/advancement/recipes/combat/paxium_sword_smithing.json
 f0e798ac5d593c7f63b229e8a0e1a845f93b17d2 data/paxium/advancement/recipes/misc/starforge.json
 82faf5be2fe370ba688f19b919f9bd5ba4c27e25 data/paxium/recipe/paxium_boots_smithing.json
+6f8c2fff34d9aa4249bb7fad0b92eda07ecba403 data/paxium/recipe/paxium_bow_smithing.json
 4ad3220f738a448c3a1addf8e7073b75e0cdf2c4 data/paxium/recipe/paxium_chestplate_smithing.json
 433c4daa543d931ef976f45f31c3e61fe384c853 data/paxium/recipe/paxium_helmet_smithing.json
 43763082e7eb8e9e0b2a92ac27f1a5e5c9fd1365 data/paxium/recipe/paxium_leggings_smithing.json

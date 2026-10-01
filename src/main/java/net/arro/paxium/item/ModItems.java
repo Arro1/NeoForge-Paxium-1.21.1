@@ -1,6 +1,7 @@
 package net.arro.paxium.item;
 
 import net.arro.paxium.Paxium;
+import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
@@ -40,6 +41,9 @@ public class ModItems {
     public static final DeferredItem<PaxiumSwordItem> PAXIUM_SWORD = ITEMS.register("paxium_sword",
             () -> new PaxiumSwordItem(Tiers.NETHERITE, new Item.Properties().fireResistant().rarity(Rarity.EPIC)
                     .attributes(SwordItem.createAttributes(Tiers.NETHERITE, 5, -2.4F))));
+
+    public static final DeferredItem<PaxiumBowItem> PAXIUM_BOW = ITEMS.register("paxium_bow",
+            () -> new PaxiumBowItem(new Item.Properties().fireResistant().rarity(Rarity.EPIC)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
