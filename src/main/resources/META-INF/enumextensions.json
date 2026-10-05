@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "PAXIUM_FIRE_BEAM",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "net/arro/paxium/client/PaxiumArmPoses",
+        "field": "FIRE_BEAM"
+      }
+    }
+  ]
+}

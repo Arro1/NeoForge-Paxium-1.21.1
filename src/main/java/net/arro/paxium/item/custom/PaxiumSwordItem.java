@@ -67,9 +67,12 @@ public class PaxiumSwordItem extends SwordItem {
         return 72000;
     }
 
+    // NONE, not SPEAR: PlayerRenderer maps SPEAR straight to the overhead THROW_SPEAR pose before it
+    // ever asks IClientItemExtensions#getArmPose, which would hide PaxiumArmPoses.FIRE_BEAM. First
+    // person doesn't depend on this - applyForgeHandTransform replaces that pose entirely.
     @Override
     public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.SPEAR;
+        return UseAnim.NONE;
     }
 
     // Fires exactly once whenever the channel ends, for any reason: releasing right-click, the Fire Meter

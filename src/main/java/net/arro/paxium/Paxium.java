@@ -6,6 +6,10 @@ import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
+import net.arro.paxium.client.PaxiumArmPoses;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.arro.paxium.component.ModDataComponents;
 import net.arro.paxium.entity.ModEntities;
 import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
@@ -172,8 +176,8 @@ public class Paxium {
             });
         }
 
-        // The vanilla SPEAR use-pose (trident wind-up) translates the item wildly upward/back and looks
-        // broken on a sword - replace the first-person hand pose entirely with a gentle forward tilt.
+        // Fire-beam channel pose. First person: replace the hand pose entirely with a gentle forward tilt.
+        // Third person: a custom arm pose (the sword's UseAnim is NONE so PlayerRenderer reaches getArmPose).
         @SubscribeEvent
         public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
             event.registerItem(new IClientItemExtensions() {
@@ -187,9 +191,15 @@ public class Paxium {
                     int side = arm == HumanoidArm.RIGHT ? 1 : -1;
                     // Same base "held in hand" offset vanilla applies before any use-animation extras.
                     poseStack.translate(side * 0.56F, -0.52F + equipProcess * -0.6F, -0.72F);
-                    // Tilt the tip forward/down instead of SPEAR's exaggerated pull-back.
+                    // Tilt the tip slightly forward/down while channeling.
                     poseStack.mulPose(Axis.XP.rotationDegrees(-20.0F));
                     return true;
+                }
+
+                // Third person (others, or F5): arm raised forward as if aiming the beam.
+                @Override
+                public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
+                    return entity.isUsingItem() && entity.getUseItem() == stack ? PaxiumArmPoses.FIRE_BEAM.getValue() : null;
                 }
             }, ModItems.PAXIUM_SWORD.get());
         }
