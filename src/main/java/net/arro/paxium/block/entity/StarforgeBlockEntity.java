@@ -1,7 +1,6 @@
 package net.arro.paxium.block.entity;
 
 import net.arro.paxium.block.custom.StarforgeBlock;
-import net.arro.paxium.item.ModItems;
 import net.arro.paxium.recipe.ModRecipeTypes;
 import net.arro.paxium.recipe.StarforgeRecipe;
 import net.arro.paxium.recipe.StarforgeRecipeInput;
@@ -51,7 +50,10 @@ public class StarforgeBlockEntity extends BlockEntity implements MenuProvider {
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
             return switch(slot) {
-                case INPUT_SLOT -> stack.getItem() == ModItems.RAW_PAXIUM.get();
+                // Any Starforge recipe's base item (raw paxium, echo shard, amethyst shard, ...).
+                case INPUT_SLOT -> level != null && level.getRecipeManager()
+                        .getAllRecipesFor(ModRecipeTypes.STARFORGING.get()).stream()
+                        .anyMatch(recipe -> recipe.value().getBase().test(stack));
                 case INPUT_BREATH_SLOT -> stack.getItem() == Items.DRAGON_BREATH;
                 case INPUT_STAR_SLOT -> stack.getItem() == Items.NETHER_STAR;
                 case OUTPUT_SLOT -> false;

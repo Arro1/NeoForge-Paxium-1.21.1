@@ -7,9 +7,11 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.recipe.ModRecipeTypes;
+import net.arro.paxium.recipe.PaxiumUpgradeSmithingRecipe;
 import net.arro.paxium.recipe.StarforgeRecipe;
 import net.arro.paxium.screen.ModMenuTypes;
 import net.arro.paxium.screen.custom.StarforgeMenu;
@@ -34,6 +36,11 @@ public class JEIPaxiumPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
+        registration.getSmithingCategory().addExtension(PaxiumUpgradeSmithingRecipe.class, new PaxiumUpgradeSmithingExtension());
+    }
+
+    @Override
     public void registerRecipes(IRecipeRegistration registration) {
         List<StarforgeRecipe> starforgeRecipes = Minecraft.getInstance().level.getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.STARFORGING.get()).stream()
@@ -52,7 +59,7 @@ public class JEIPaxiumPlugin implements IModPlugin {
         registration.addRecipeClickArea(StarforgeScreen.class, 73, 35, 24, 16, StarforgeRecipeCategory.STARFORGING_TYPE);
     }
 
-    // StarforgeMenu adds the 36 player slots first, then the Starforge slots: 36 paxium, 37 breath, 38 star, 39 output.
+    // StarforgeMenu adds the 36 player slots first, then the Starforge slots: 36 base, 37 breath, 38 star, 39 output.
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
         registration.addRecipeTransferHandler(StarforgeMenu.class, ModMenuTypes.STARFORGE_MENU.get(),

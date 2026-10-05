@@ -14,6 +14,9 @@ public class ModRecipeSerializers {
     public static final DeferredHolder<RecipeSerializer<?>, StarforgeRecipe.Serializer> STARFORGING_SERIALIZER =
             RECIPE_SERIALIZERS.register("starforging", StarforgeRecipe.Serializer::new);
 
+    public static final DeferredHolder<RecipeSerializer<?>, PaxiumUpgradeSmithingRecipe.Serializer> PAXIUM_UPGRADE_SMITHING_SERIALIZER =
+            RECIPE_SERIALIZERS.register("armor_upgrade_smithing", PaxiumUpgradeSmithingRecipe.Serializer::new);
+
     public static void register(IEventBus eventBus) {
         RECIPE_SERIALIZERS.register(eventBus);
     }

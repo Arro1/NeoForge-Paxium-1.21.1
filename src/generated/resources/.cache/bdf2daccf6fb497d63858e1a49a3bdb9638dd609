@@ -1,12 +1,14 @@
-// 1.21.1	2026-10-01T19:26:25.1553781	Item Models: paxium
+// 1.21.1	2026-10-05T22:57:56.7828701	Item Models: paxium
 6d80e051ddbbc3077e20dc7ae5dcc55b786801b5 assets/paxium/models/item/paxium.json
 440988e2c4a3fb85f4deb55f375ac0812f9297c3 assets/paxium/models/item/paxium_boots.json
 d98db5cead793c066c4e9b27655f4be970a8fbd8 assets/paxium/models/item/paxium_bow.json
 db6977781d1b38baa8d313abe03e8ade3665f354 assets/paxium/models/item/paxium_bow_pulling_0.json
 9abc57d6d40abaaee8db78b27726e585e53f0e5d assets/paxium/models/item/paxium_bow_pulling_1.json
 34c2ae159f70a5bba92c8df0877c25869c5afca4 assets/paxium/models/item/paxium_bow_pulling_2.json
+872918b64fbcf98778a3c5470fd972bc49825d70 assets/paxium/models/item/paxium_capacity_upgrade_smithing_template.json
 88e582a91846ce4e850a7332c19c33c98656335c assets/paxium/models/item/paxium_chestplate.json
 0cce7ec08778dd760b1621b53fff2e778bb6c5fc assets/paxium/models/item/paxium_helmet.json
 53ebaff8e067edf7561733d4b8f6ac5937123b4f assets/paxium/models/item/paxium_leggings.json
+d65bdae19bcb70e7524b1b436d53f56265ded4dc assets/paxium/models/item/paxium_recharge_upgrade_smithing_template.json
 5c035305cd82ad569caad20d105d408ad386ab13 assets/paxium/models/item/paxium_sword.json
 7eb4891e9c49cace2efb2d23b21c8d2bfe1210d8 assets/paxium/models/item/raw_paxium.json

@@ -71,10 +71,10 @@ public class StarforgeRecipeCategory implements IRecipeCategory<StarforgeRecipe>
         return HEIGHT;
     }
 
-    // Slot order must match the Starforge menu slots (paxium, dragon breath, nether star) for recipe transfer.
+    // Slot order must match the Starforge menu slots (base, dragon breath, nether star) for recipe transfer.
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, StarforgeRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 34 - OFFSET_Y).addIngredients(recipe.getPaxium());
+        builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 34 - OFFSET_Y).addIngredients(recipe.getBase());
         builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 52 - OFFSET_Y).addIngredients(recipe.getDragonBreath());
         builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 16 - OFFSET_Y).addIngredients(recipe.getNetherStar());
         builder.addSlot(RecipeIngredientRole.OUTPUT, 104 - OFFSET_X, 34 - OFFSET_Y)

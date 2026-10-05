@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
+import net.arro.paxium.component.ModDataComponents;
 import net.arro.paxium.entity.ModEntities;
 import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
 import net.arro.paxium.event.ModEvents;
@@ -76,6 +77,7 @@ public class Paxium {
 
         ModCreativeModeTabs.register(modEventBus);
 
+        ModDataComponents.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
@@ -129,13 +131,13 @@ public class Paxium {
     }
 
     public static class ClientModEvents {
-        private static final ResourceLocation FLIGHT_FUEL_BAR_BACKGROUND_SPRITE =
+        private static final ResourceLocation FIRE_METER_BAR_BACKGROUND_SPRITE =
                 ResourceLocation.withDefaultNamespace("hud/experience_bar_background");
-        private static final ResourceLocation FLIGHT_FUEL_BAR_PROGRESS_SPRITE =
+        private static final ResourceLocation FIRE_METER_BAR_PROGRESS_SPRITE =
                 ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
 
         // How far to push the XP bar / health / armor / food / air / etc. up, to make
-        // room for the flight fuel bar directly above the hotbar.
+        // room for the Fire Meter bar directly above the hotbar.
         private static final float HUD_SHIFT_PX = 9.0F;
 
         @SubscribeEvent
@@ -204,13 +206,13 @@ public class Paxium {
 
             event.registerAbove(
                     VanillaGuiLayers.AIR_LEVEL,
-                    ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "flight_fuel_bar"),
-                    (guiGraphics, deltaTracker) -> renderFlightFuelBar(guiGraphics));
+                    ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "fire_meter_bar"),
+                    (guiGraphics, deltaTracker) -> renderFireMeterBar(guiGraphics));
         }
 
         private static LayeredDraw.Layer shiftedUp(LayeredDraw.Layer original) {
             return (guiGraphics, deltaTracker) -> {
-                if (isFlightFuelBarShown()) {
+                if (isFireMeterBarShown()) {
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0F, -HUD_SHIFT_PX, 0.0F);
                     original.render(guiGraphics, deltaTracker);
@@ -221,28 +223,29 @@ public class Paxium {
             };
         }
 
-        private static boolean isFlightFuelBarShown() {
+        private static boolean isFireMeterBarShown() {
             Player player = Minecraft.getInstance().player;
             return player != null && PaxiumArmor.hasFullSet(player);
         }
 
-        private static void renderFlightFuelBar(GuiGraphics guiGraphics) {
-            if (!isFlightFuelBarShown()) {
+        private static void renderFireMeterBar(GuiGraphics guiGraphics) {
+            if (!isFireMeterBarShown()) {
                 return;
             }
 
             Player player = Minecraft.getInstance().player;
-            int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-            int filledWidth = Math.round((float) fuel / ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS * 182.0F);
+            float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+            int capacity = PaxiumArmor.getFireMeterCapacity(player);
+            int filledWidth = Math.round(Math.min(1.0F, meter / capacity) * 182.0F);
 
             int x = guiGraphics.guiWidth() / 2 - 91;
             int y = guiGraphics.guiHeight() - 30;
 
             guiGraphics.setColor(1.0F, 0.5F, 0.0F, 1.0F);
-            guiGraphics.blitSprite(FLIGHT_FUEL_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
+            guiGraphics.blitSprite(FIRE_METER_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
             if (filledWidth > 0) {
                 guiGraphics.setColor(1.0F, 0.65F, 0.05F, 1.0F);
-                guiGraphics.blitSprite(FLIGHT_FUEL_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
+                guiGraphics.blitSprite(FIRE_METER_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
             }
             guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         }

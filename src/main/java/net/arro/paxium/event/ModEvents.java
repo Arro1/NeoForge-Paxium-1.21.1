@@ -2,6 +2,7 @@ package net.arro.paxium.event;
 
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.component.FireMeterUpgrades;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
@@ -10,6 +11,7 @@ import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -46,11 +48,11 @@ public class ModEvents {
     private static final AttributeModifier FLIGHT_MODIFIER =
             new AttributeModifier(FLIGHT_MODIFIER_ID, 1.0, AttributeModifier.Operation.ADD_VALUE);
 
-    // Players who flew and haven't touched the ground since - fuel stays frozen mid-fall until they land.
+    // Players who flew and haven't touched the ground since - the Fire Meter stays frozen mid-fall until they land.
     private static final Set<UUID> AWAITING_LANDING = new HashSet<>();
 
     private static final double FIRE_BEAM_RANGE = 20.0;
-    private static final int FIRE_BEAM_FUEL_PER_TICK = 2;
+    private static final float FIRE_BEAM_METER_PER_TICK = 2.0F;
     private static final float FIRE_BEAM_DAMAGE = 6.0F;
 
     @SubscribeEvent
@@ -67,7 +69,7 @@ public class ModEvents {
 
         if (player.isCreative()) {
             // Creative already has free flight/immortality; only the beam matters here, and it
-            // should fire indefinitely without touching the fuel meter at all.
+            // should fire indefinitely without touching the Fire Meter at all.
             updateFireBeamCreative(player);
             return;
         }
@@ -96,13 +98,15 @@ public class ModEvents {
     }
 
     private static void updateFlight(Player player, boolean channelingBeam) {
-        int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-        int updatedFuel = fuel;
+        float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+        int capacity = PaxiumArmor.getFireMeterCapacity(player);
+        // Clamp first so swapping in a lower-capacity piece trims an overfull meter.
+        float updatedMeter = Math.min(meter, capacity);
 
         UUID id = player.getUUID();
 
         if (player.getAbilities().flying) {
-            updatedFuel = Math.max(0, fuel - 1);
+            updatedMeter = Math.max(0.0F, updatedMeter - 1.0F);
             AWAITING_LANDING.add(id);
         } else if (AWAITING_LANDING.contains(id) && !player.onGround()) {
             // Still falling after flight ended - hold off on regenerating until they land.
@@ -111,15 +115,15 @@ public class ModEvents {
             // Don't passively regenerate while the beam is actively draining the same pool this
             // tick - otherwise the two fight each other and the meter never settles at 0.
             if (!channelingBeam) {
-                updatedFuel = Math.min(ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS, fuel + 1);
+                updatedMeter = Math.min(capacity, updatedMeter + PaxiumArmor.getFireMeterRechargeRate(player));
             }
         }
 
-        if (updatedFuel != fuel) {
-            player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), updatedFuel);
+        if (updatedMeter != meter) {
+            player.setData(ModAttachmentTypes.FIRE_METER.get(), updatedMeter);
         }
 
-        setFlightAllowed(player, updatedFuel > 0);
+        setFlightAllowed(player, updatedMeter > 0.0F);
     }
 
     private static void setFlightAllowed(Player player, boolean allowed) {
@@ -155,7 +159,7 @@ public class ModEvents {
             return;
         }
 
-        // No fuel read/write at all - indefinite beam in creative.
+        // No Fire Meter read/write at all - indefinite beam in creative.
         fireBeamTick(player);
     }
 
@@ -164,13 +168,13 @@ public class ModEvents {
             return;
         }
 
-        int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-        if (fuel <= 0) {
+        float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+        if (meter <= 0.0F) {
             player.stopUsingItem();
             return;
         }
 
-        player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), Math.max(0, fuel - FIRE_BEAM_FUEL_PER_TICK));
+        player.setData(ModAttachmentTypes.FIRE_METER.get(), Math.max(0.0F, meter - FIRE_BEAM_METER_PER_TICK));
         fireBeamTick(player);
     }
 
@@ -288,11 +292,39 @@ public class ModEvents {
         }
 
         if (stack.getItem() instanceof ArmorItem armorItem && armorItem.getMaterial() == ModArmorMaterials.PAXIUM) {
+            FireMeterUpgrades upgrades = PaxiumArmor.getUpgrades(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.fire_meter_upgrades")
+                    .withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.fire_meter_capacity", upgrades.capacity(),
+                    Component.translatable("tooltip.paxium.fire_meter_capacity_bonus",
+                            upgrades.capacity() * ModAttachmentTypes.CAPACITY_PER_LEVEL)));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.fire_meter_recharge", upgrades.recharge(),
+                    Component.translatable("tooltip.paxium.fire_meter_recharge_bonus",
+                            Math.round(upgrades.recharge() * ModAttachmentTypes.RECHARGE_BONUS_PER_LEVEL * 100))));
+
             event.getToolTip().add(Component.translatable("tooltip.paxium.fire_immunity_set_bonus")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
-            event.getToolTip().add(Component.translatable("tooltip.paxium.flight_set_bonus")
+            event.getToolTip().add(Component.translatable("tooltip.paxium.fire_meter_set_bonus")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         }
+    }
+
+    // "  Capacity  ■■□  II  +50" - filled pips gold, empty pips dark gray, bonus only once upgraded.
+    private static Component upgradeLine(String labelKey, int level, Component bonus) {
+        MutableComponent line = Component.literal("  ")
+                .append(Component.translatable(labelKey).withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("  "))
+                .append(Component.literal("■".repeat(level)).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("□".repeat(FireMeterUpgrades.MAX_LEVEL - level)).withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal("  "));
+
+        if (level == 0) {
+            return line.append(Component.literal("-").withStyle(ChatFormatting.DARK_GRAY));
+        }
+
+        return line.append(Component.translatable("enchantment.level." + level).withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal("  "))
+                .append(bonus.copy().withStyle(ChatFormatting.DARK_GRAY));
     }
 
     public static void register(IEventBus eventBus) {

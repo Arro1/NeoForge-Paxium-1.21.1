@@ -47,8 +47,8 @@ public class PaxiumSwordItem extends SwordItem {
         }
 
         if (!player.isCreative()) {
-            int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-            if (fuel <= 0) {
+            float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+            if (meter <= 0.0F) {
                 return InteractionResultHolder.fail(stack);
             }
         }
@@ -72,9 +72,9 @@ public class PaxiumSwordItem extends SwordItem {
         return UseAnim.SPEAR;
     }
 
-    // Fires exactly once whenever the channel ends, for any reason: releasing right-click, the fuel
+    // Fires exactly once whenever the channel ends, for any reason: releasing right-click, the Fire Meter
     // running out, or losing the full set mid-beam. Puts the sword on a short cooldown either way, so
-    // hitting 0 fuel while still holding the button can't immediately restart the beam for a burst of
+    // hitting an empty meter while still holding the button can't immediately restart the beam for a burst of
     // tiny re-triggers.
     @Override
     public void onStopUsing(ItemStack stack, LivingEntity entity, int count) {
