@@ -34,5 +34,8 @@
 
   "creativetab.paxium.paxium": "Paxium",
 
+  "gui.paxium.starforge.sky_obstructed": "Sky obstructed",
+  "gui.paxium.starforge.charging": "Charging...",
+
   "jei.paxium.starforging": "Starforging"
 }

@@ -1,32 +1,62 @@
 {
   "variants": {
-    "facing=east,lit=false": {
+    "charging=false,facing=east,lit=false": {
       "model": "paxium:block/starforge",
       "y": 270
     },
-    "facing=east,lit=true": {
+    "charging=false,facing=east,lit=true": {
       "model": "paxium:block/starforge_on",
       "y": 270
     },
-    "facing=north,lit=false": {
+    "charging=false,facing=north,lit=false": {
       "model": "paxium:block/starforge",
       "y": 180
     },
-    "facing=north,lit=true": {
+    "charging=false,facing=north,lit=true": {
       "model": "paxium:block/starforge_on",
       "y": 180
     },
-    "facing=south,lit=false": {
+    "charging=false,facing=south,lit=false": {
       "model": "paxium:block/starforge"
     },
-    "facing=south,lit=true": {
+    "charging=false,facing=south,lit=true": {
       "model": "paxium:block/starforge_on"
     },
-    "facing=west,lit=false": {
+    "charging=false,facing=west,lit=false": {
       "model": "paxium:block/starforge",
       "y": 90
     },
-    "facing=west,lit=true": {
+    "charging=false,facing=west,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 90
+    },
+    "charging=true,facing=east,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 270
+    },
+    "charging=true,facing=east,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 270
+    },
+    "charging=true,facing=north,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 180
+    },
+    "charging=true,facing=north,lit=true": {
+      "model": "paxium:block/starforge_on",
+      "y": 180
+    },
+    "charging=true,facing=south,lit=false": {
+      "model": "paxium:block/starforge"
+    },
+    "charging=true,facing=south,lit=true": {
+      "model": "paxium:block/starforge_on"
+    },
+    "charging=true,facing=west,lit=false": {
+      "model": "paxium:block/starforge",
+      "y": 90
+    },
+    "charging=true,facing=west,lit=true": {
       "model": "paxium:block/starforge_on",
       "y": 90
     }

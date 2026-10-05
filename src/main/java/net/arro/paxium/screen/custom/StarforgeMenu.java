@@ -18,7 +18,8 @@ public class StarforgeMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     public StarforgeMenu(int pContainerId, Inventory inv, FriendlyByteBuf extraData) {
-        this(pContainerId, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(2));
+        this(pContainerId, inv, inv.player.level().getBlockEntity(extraData.readBlockPos()),
+                new SimpleContainerData(StarforgeBlockEntity.DATA_COUNT));
     }
 
     public StarforgeMenu(int pContainerId, Inventory inv, BlockEntity entity, ContainerData data) {
@@ -39,15 +40,29 @@ public class StarforgeMenu extends AbstractContainerMenu {
     }
 
     public boolean isCrafting() {
-        return data.get(0) > 0;
+        return data.get(StarforgeBlockEntity.DATA_PHASE) == StarforgeBlockEntity.Phase.CRAFTING.ordinal()
+                && data.get(StarforgeBlockEntity.DATA_PROGRESS) > 0;
+    }
+
+    public boolean isCharging() {
+        return data.get(StarforgeBlockEntity.DATA_PHASE) == StarforgeBlockEntity.Phase.CHARGING.ordinal();
+    }
+
+    public boolean hasSkyAccess() {
+        return data.get(StarforgeBlockEntity.DATA_SKY_ACCESS) != 0;
     }
 
     public int getScaledArrowProgress() {
-        int progress = this.data.get(0);
-        int maxProgress = this.data.get(1);
-        int arrowPixelSize = 24;
+        return scale(data.get(StarforgeBlockEntity.DATA_PROGRESS), data.get(StarforgeBlockEntity.DATA_MAX_PROGRESS));
+    }
 
-        return maxProgress != 0 && progress != 0 ? progress * arrowPixelSize / maxProgress : 0;
+    public int getScaledChargeProgress() {
+        return scale(data.get(StarforgeBlockEntity.DATA_CHARGE_PROGRESS), StarforgeBlockEntity.CHARGE_TIME);
+    }
+
+    private static int scale(int progress, int max) {
+        int arrowPixelSize = 24;
+        return max != 0 && progress != 0 ? progress * arrowPixelSize / max : 0;
     }
 
     // CREDIT GOES TO: diesieben07 | https://github.com/diesieben07/SevenCommons

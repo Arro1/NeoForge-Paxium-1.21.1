@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
+import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
 import net.arro.paxium.component.ModDataComponents;
 import net.arro.paxium.entity.ModEntities;
 import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
@@ -148,6 +149,7 @@ public class Paxium {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.PAXIUM_FIRE_BURST.get(), PaxiumFireBurstRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.STARFORGE_BE.get(), StarforgeBlockEntityRenderer::new);
         }
 
         // Vanilla only wires the "pulling"/"pull" item-property functions to the literal Items.BOW
