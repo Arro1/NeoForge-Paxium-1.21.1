@@ -2,6 +2,7 @@ package net.arro.paxium.event;
 
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.client.PaxiumClientHelper;
 import net.arro.paxium.component.FireMeterUpgrades;
 import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -253,16 +255,38 @@ public class ModEvents {
 
         RandomSource random = level.random;
         AABB box = player.getBoundingBox();
-        double x = box.minX + random.nextDouble() * (box.maxX - box.minX);
-        double y = box.minY + random.nextDouble() * (box.maxY - box.minY);
-        double z = box.minZ + random.nextDouble() * (box.maxZ - box.minZ);
+        double height = box.maxY - box.minY;
 
+        // Your own camera sits inside the bounding box in first person, so anything spawned there
+        // ends up in your face: keep it to small flames around the feet, and no rising smoke.
+        if (PaxiumClientHelper.isLocalFirstPerson(player)) {
+            if (random.nextInt(4) == 0) {
+                Vec3 point = randomPerimeterPoint(box, random, 0.1, box.minY + random.nextDouble() * height * 0.35);
+                level.addParticle(ParticleTypes.SMALL_FLAME, point.x, point.y, point.z, 0.0, 0.0, 0.0);
+            }
+            return;
+        }
+
+        // Seen from outside: a full-body aura on the edge of the body, smoke only from the lower half.
         if (random.nextInt(3) == 0) {
-            level.addParticle(ParticleTypes.FLAME, x, y, z, 0.0, 0.0, 0.0);
+            Vec3 point = randomPerimeterPoint(box, random, 0.05, box.minY + random.nextDouble() * height);
+            level.addParticle(ParticleTypes.FLAME, point.x, point.y, point.z, 0.0, 0.0, 0.0);
         }
         if (random.nextInt(5) == 0) {
-            level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.0, 0.0);
+            Vec3 point = randomPerimeterPoint(box, random, 0.05, box.minY + random.nextDouble() * height * 0.5);
+            level.addParticle(ParticleTypes.SMOKE, point.x, point.y, point.z, 0.0, 0.0, 0.0);
         }
+    }
+
+    // A point on one of the box's four vertical faces at height y, pushed `outset` outward.
+    private static Vec3 randomPerimeterPoint(AABB box, RandomSource random, double outset, double y) {
+        double t = random.nextDouble();
+        return switch (random.nextInt(4)) {
+            case 0 -> new Vec3(box.minX - outset, y, Mth.lerp(t, box.minZ, box.maxZ));
+            case 1 -> new Vec3(box.maxX + outset, y, Mth.lerp(t, box.minZ, box.maxZ));
+            case 2 -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.minZ - outset);
+            default -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.maxZ + outset);
+        };
     }
 
     @SubscribeEvent
