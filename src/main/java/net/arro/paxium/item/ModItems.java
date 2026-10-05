@@ -51,26 +51,39 @@ public class ModItems {
     public static final DeferredItem<PaxiumBowItem> PAXIUM_BOW = ITEMS.register("paxium_bow",
             () -> new PaxiumBowItem(new Item.Properties().fireResistant().rarity(Rarity.EPIC)));
 
+    // Ghost icons for the armor templates' base slot.
+    private static final List<ResourceLocation> ARMOR_ICONS = List.of(
+            ResourceLocation.withDefaultNamespace("item/empty_armor_slot_helmet"),
+            ResourceLocation.withDefaultNamespace("item/empty_armor_slot_chestplate"),
+            ResourceLocation.withDefaultNamespace("item/empty_armor_slot_leggings"),
+            ResourceLocation.withDefaultNamespace("item/empty_armor_slot_boots"));
+
     // Applied in the smithing table (template + Paxium armor piece + Paxium) to raise one Fire Meter
     // stat on that piece by one level, up to III - see PaxiumUpgradeSmithingRecipe.
     public static final DeferredItem<SmithingTemplateItem> PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE = ITEMS.register(
-            "paxium_capacity_upgrade_smithing_template", () -> fireMeterUpgradeTemplate("capacity"));
+            "paxium_capacity_upgrade_smithing_template", () -> upgradeTemplate("capacity", "fire_meter_upgrade", ARMOR_ICONS));
     public static final DeferredItem<SmithingTemplateItem> PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE = ITEMS.register(
-            "paxium_recharge_upgrade_smithing_template", () -> fireMeterUpgradeTemplate("recharge"));
+            "paxium_recharge_upgrade_smithing_template", () -> upgradeTemplate("recharge", "fire_meter_upgrade", ARMOR_ICONS));
+    // Same, for the weapons: Beam Damage on the Paxium Sword, Blast on the Paxium Bow.
+    public static final DeferredItem<SmithingTemplateItem> PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE = ITEMS.register(
+            "paxium_beam_damage_upgrade_smithing_template", () -> upgradeTemplate("beam_damage", "sword_upgrade",
+                    List.of(ResourceLocation.withDefaultNamespace("item/empty_slot_sword"))));
+    // No vanilla empty-slot icon exists for bows, so the base slot shows none.
+    public static final DeferredItem<SmithingTemplateItem> PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE = ITEMS.register(
+            "paxium_blast_upgrade_smithing_template", () -> upgradeTemplate("blast", "bow_upgrade", List.of()));
 
-    private static SmithingTemplateItem fireMeterUpgradeTemplate(String stat) {
+    // stat: picks the "upgrade.paxium.<stat>_upgrade" title. target: picks the applies-to / base-slot
+    // lang keys under "item.paxium.smithing_template.<target>". All templates take a Paxium ingot.
+    private static SmithingTemplateItem upgradeTemplate(String stat, String target, List<ResourceLocation> baseIcons) {
         return new SmithingTemplateItem(
-                Component.translatable("item.paxium.smithing_template.fire_meter_upgrade.applies_to")
+                Component.translatable("item.paxium.smithing_template." + target + ".applies_to")
                         .withStyle(ChatFormatting.BLUE),
                 Component.translatable("item.paxium.smithing_template.fire_meter_upgrade.ingredients")
                         .withStyle(ChatFormatting.BLUE),
                 Component.translatable("upgrade.paxium." + stat + "_upgrade").withStyle(ChatFormatting.GRAY),
-                Component.translatable("item.paxium.smithing_template.fire_meter_upgrade.base_slot_description"),
+                Component.translatable("item.paxium.smithing_template." + target + ".base_slot_description"),
                 Component.translatable("item.paxium.smithing_template.fire_meter_upgrade.additions_slot_description"),
-                List.of(ResourceLocation.withDefaultNamespace("item/empty_armor_slot_helmet"),
-                        ResourceLocation.withDefaultNamespace("item/empty_armor_slot_chestplate"),
-                        ResourceLocation.withDefaultNamespace("item/empty_armor_slot_leggings"),
-                        ResourceLocation.withDefaultNamespace("item/empty_armor_slot_boots")),
+                baseIcons,
                 List.of(ResourceLocation.withDefaultNamespace("item/empty_slot_ingot")));
     }
 

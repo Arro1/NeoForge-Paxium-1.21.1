@@ -2,7 +2,7 @@ package net.arro.paxium.datagen;
 
 import net.arro.paxium.Paxium;
 import net.arro.paxium.block.ModBlocks;
-import net.arro.paxium.component.FireMeterUpgrades;
+import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.item.ModItems;
 import net.arro.paxium.recipe.PaxiumUpgradeSmithingRecipe;
 import net.arro.paxium.recipe.StarforgeRecipe;
@@ -54,10 +54,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
         starforging(recipeOutput, Items.ECHO_SHARD, ModItems.PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE.get());
         starforging(recipeOutput, Items.AMETHYST_SHARD, ModItems.PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE.get());
 
-        fireMeterUpgrade(recipeOutput, ModItems.PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE.get(),
-                FireMeterUpgrades.Stat.CAPACITY, "capacity_upgrade_smithing");
-        fireMeterUpgrade(recipeOutput, ModItems.PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE.get(),
-                FireMeterUpgrades.Stat.RECHARGE, "recharge_upgrade_smithing");
+        starforging(recipeOutput, Items.BLAZE_ROD, ModItems.PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE.get());
+        starforging(recipeOutput, Items.FIRE_CHARGE, ModItems.PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE.get());
+
+        Ingredient paxiumArmor = Ingredient.of(ModItems.PAXIUM_HELMET.get(), ModItems.PAXIUM_CHESTPLATE.get(),
+                ModItems.PAXIUM_LEGGINGS.get(), ModItems.PAXIUM_BOOTS.get());
+        upgradeSmithing(recipeOutput, ModItems.PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE.get(), paxiumArmor,
+                PaxiumUpgradeStat.CAPACITY, "capacity_upgrade_smithing");
+        upgradeSmithing(recipeOutput, ModItems.PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE.get(), paxiumArmor,
+                PaxiumUpgradeStat.RECHARGE, "recharge_upgrade_smithing");
+        upgradeSmithing(recipeOutput, ModItems.PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE.get(),
+                Ingredient.of(ModItems.PAXIUM_SWORD.get()), PaxiumUpgradeStat.BEAM_DAMAGE, "beam_damage_upgrade_smithing");
+        upgradeSmithing(recipeOutput, ModItems.PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE.get(),
+                Ingredient.of(ModItems.PAXIUM_BOW.get()), PaxiumUpgradeStat.BLAST, "blast_upgrade_smithing");
 
         smithingUpgrade(recipeOutput, Items.NETHERITE_HELMET, ModItems.PAXIUM_HELMET.get(), "paxium_helmet_smithing");
         smithingUpgrade(recipeOutput, Items.NETHERITE_CHESTPLATE, ModItems.PAXIUM_CHESTPLATE.get(), "paxium_chestplate_smithing");
@@ -80,13 +89,13 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 null);
     }
 
-    private void fireMeterUpgrade(RecipeOutput recipeOutput, Item template, FireMeterUpgrades.Stat stat, String recipeId) {
+    // Template + base item + Paxium ingot -> same item with the stat one level higher.
+    private void upgradeSmithing(RecipeOutput recipeOutput, Item template, Ingredient base, PaxiumUpgradeStat stat, String recipeId) {
         recipeOutput.accept(
                 ResourceLocation.fromNamespaceAndPath(Paxium.MODID, recipeId),
                 new PaxiumUpgradeSmithingRecipe(
                         Ingredient.of(template),
-                        Ingredient.of(ModItems.PAXIUM_HELMET.get(), ModItems.PAXIUM_CHESTPLATE.get(),
-                                ModItems.PAXIUM_LEGGINGS.get(), ModItems.PAXIUM_BOOTS.get()),
+                        base,
                         Ingredient.of(ModItems.PAXIUM.get()),
                         stat),
                 null);

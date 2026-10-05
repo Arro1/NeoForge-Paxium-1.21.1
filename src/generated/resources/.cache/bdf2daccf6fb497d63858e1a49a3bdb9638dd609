@@ -1,5 +1,7 @@
-// 1.21.1	2026-10-05T22:57:56.7828701	Item Models: paxium
+// 1.21.1	2026-10-05T23:50:49.7996363	Item Models: paxium
 6d80e051ddbbc3077e20dc7ae5dcc55b786801b5 assets/paxium/models/item/paxium.json
+3a88e3855c3f5886306281037aee71546438a2c6 assets/paxium/models/item/paxium_beam_damage_upgrade_smithing_template.json
+d07ea4896e8f882691842affae60e37f2f3abaef assets/paxium/models/item/paxium_blast_upgrade_smithing_template.json
 440988e2c4a3fb85f4deb55f375ac0812f9297c3 assets/paxium/models/item/paxium_boots.json
 d98db5cead793c066c4e9b27655f4be970a8fbd8 assets/paxium/models/item/paxium_bow.json
 db6977781d1b38baa8d313abe03e8ade3665f354 assets/paxium/models/item/paxium_bow_pulling_0.json

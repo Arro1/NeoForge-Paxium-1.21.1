@@ -3,6 +3,7 @@ package net.arro.paxium.util;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.component.FireMeterUpgrades;
 import net.arro.paxium.component.ModDataComponents;
+import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.item.ModItems;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,22 +29,22 @@ public class PaxiumArmor {
         return stack.getOrDefault(ModDataComponents.FIRE_METER_UPGRADES.get(), FireMeterUpgrades.EMPTY);
     }
 
-    private static int totalLevels(LivingEntity entity, FireMeterUpgrades.Stat stat) {
+    private static int totalLevels(LivingEntity entity, PaxiumUpgradeStat stat) {
         int total = 0;
         for (EquipmentSlot slot : ARMOR_SLOTS) {
-            total += getUpgrades(entity.getItemBySlot(slot)).level(stat);
+            total += stat.getLevel(entity.getItemBySlot(slot));
         }
         return total;
     }
 
     public static int getFireMeterCapacity(LivingEntity entity) {
         return ModAttachmentTypes.BASE_FIRE_METER_CAPACITY
-                + totalLevels(entity, FireMeterUpgrades.Stat.CAPACITY) * ModAttachmentTypes.CAPACITY_PER_LEVEL;
+                + totalLevels(entity, PaxiumUpgradeStat.CAPACITY) * ModAttachmentTypes.CAPACITY_PER_LEVEL;
     }
 
     public static float getFireMeterRechargeRate(LivingEntity entity) {
         return ModAttachmentTypes.BASE_RECHARGE_PER_TICK
-                * (1.0F + totalLevels(entity, FireMeterUpgrades.Stat.RECHARGE) * ModAttachmentTypes.RECHARGE_BONUS_PER_LEVEL);
+                * (1.0F + totalLevels(entity, PaxiumUpgradeStat.RECHARGE) * ModAttachmentTypes.RECHARGE_BONUS_PER_LEVEL);
     }
 
     private PaxiumArmor() {

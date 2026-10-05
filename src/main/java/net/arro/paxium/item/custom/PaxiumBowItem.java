@@ -1,6 +1,7 @@
 package net.arro.paxium.item.custom;
 
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
 import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.server.level.ServerLevel;
@@ -70,8 +71,9 @@ public class PaxiumBowItem extends BowItem {
         }
 
         if (level instanceof ServerLevel serverLevel) {
+            // Blast upgrades raise damage and radius only - the meter cost above stays fixed.
             PaxiumFireBurstEntity burst = new PaxiumFireBurstEntity(player, serverLevel,
-                    player.getX(), player.getEyeY(), player.getZ());
+                    player.getX(), player.getEyeY(), player.getZ(), PaxiumUpgradeStat.BLAST.getLevel(stack));
             burst.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, PROJECTILE_VELOCITY, 1.0F);
             serverLevel.addFreshEntity(burst);
         }

@@ -3,6 +3,8 @@ package net.arro.paxium.event;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.component.FireMeterUpgrades;
+import net.arro.paxium.component.PaxiumUpgradeStat;
+import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
@@ -54,6 +56,8 @@ public class ModEvents {
     private static final double FIRE_BEAM_RANGE = 20.0;
     private static final float FIRE_BEAM_METER_PER_TICK = 2.0F;
     private static final float FIRE_BEAM_DAMAGE = 6.0F;
+    // Per Beam Damage level on the sword; meter drain is unaffected.
+    public static final float BEAM_DAMAGE_PER_LEVEL = 2.0F;
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
@@ -191,11 +195,14 @@ public class ModEvents {
             end = blockHit.getLocation();
         }
 
+        float damage = FIRE_BEAM_DAMAGE
+                + BEAM_DAMAGE_PER_LEVEL * PaxiumUpgradeStat.BEAM_DAMAGE.getLevel(player.getUseItem());
+
         AABB sweep = new AABB(start, end).inflate(1.0);
         for (Entity candidate : level.getEntities(player, sweep, e -> e instanceof LivingEntity living && living.isAlive())) {
             if (candidate.getBoundingBox().clip(start, end).isPresent()) {
                 LivingEntity target = (LivingEntity) candidate;
-                boolean damaged = target.hurt(level.damageSources().playerAttack(player), FIRE_BEAM_DAMAGE);
+                boolean damaged = target.hurt(level.damageSources().playerAttack(player), damage);
                 target.igniteForSeconds(PaxiumSwordItem.IGNITE_SECONDS);
                 if (damaged) {
                     level.playSound(null, target.getX(), target.getY(), target.getZ(),
@@ -284,11 +291,23 @@ public class ModEvents {
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
             event.getToolTip().add(Component.translatable("tooltip.paxium.sword_fire_beam")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+
+            int level = PaxiumUpgradeStat.BEAM_DAMAGE.getLevel(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.weapon_upgrades").withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.beam_damage", level,
+                    Component.translatable("tooltip.paxium.beam_damage_bonus", Math.round(level * BEAM_DAMAGE_PER_LEVEL))));
         }
 
         if (stack.getItem() instanceof PaxiumBowItem) {
             event.getToolTip().add(Component.translatable("tooltip.paxium.bow_fire_burst")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+
+            int level = PaxiumUpgradeStat.BLAST.getLevel(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.weapon_upgrades").withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.blast", level,
+                    Component.translatable("tooltip.paxium.blast_bonus",
+                            Math.round(level * PaxiumFireBurstEntity.DAMAGE_PER_LEVEL),
+                            Math.round(level * PaxiumFireBurstEntity.POWER_PER_LEVEL / PaxiumFireBurstEntity.BASE_EXPLOSION_POWER * 100))));
         }
 
         if (stack.getItem() instanceof ArmorItem armorItem && armorItem.getMaterial() == ModArmorMaterials.PAXIUM) {
@@ -315,7 +334,7 @@ public class ModEvents {
                 .append(Component.translatable(labelKey).withStyle(ChatFormatting.GRAY))
                 .append(Component.literal("  "))
                 .append(Component.literal("■".repeat(level)).withStyle(ChatFormatting.GOLD))
-                .append(Component.literal("□".repeat(FireMeterUpgrades.MAX_LEVEL - level)).withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal("□".repeat(PaxiumUpgradeStat.MAX_LEVEL - level)).withStyle(ChatFormatting.DARK_GRAY))
                 .append(Component.literal("  "));
 
         if (level == 0) {

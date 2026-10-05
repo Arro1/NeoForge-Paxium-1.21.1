@@ -2,9 +2,7 @@ package net.arro.paxium.recipe;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.arro.paxium.component.FireMeterUpgrades;
-import net.arro.paxium.component.ModDataComponents;
-import net.arro.paxium.util.PaxiumArmor;
+import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -18,16 +16,16 @@ import net.minecraft.world.level.Level;
 
 import java.util.stream.Stream;
 
-// Smithing-table recipe that keeps the base armor piece as-is and raises one Fire Meter stat by a
-// single level. Stops matching once that stat is at FireMeterUpgrades.MAX_LEVEL, so a level III piece
-// shows no output instead of eating the template.
+// Smithing-table recipe that keeps the base item (armor piece or weapon) as-is and raises one
+// PaxiumUpgradeStat by a single level. Stops matching once that stat is at MAX_LEVEL, so a level III
+// item shows no output instead of eating the template.
 public class PaxiumUpgradeSmithingRecipe implements SmithingRecipe {
     private final Ingredient template;
     private final Ingredient base;
     private final Ingredient addition;
-    private final FireMeterUpgrades.Stat stat;
+    private final PaxiumUpgradeStat stat;
 
-    public PaxiumUpgradeSmithingRecipe(Ingredient template, Ingredient base, Ingredient addition, FireMeterUpgrades.Stat stat) {
+    public PaxiumUpgradeSmithingRecipe(Ingredient template, Ingredient base, Ingredient addition, PaxiumUpgradeStat stat) {
         this.template = template;
         this.base = base;
         this.addition = addition;
@@ -46,14 +44,14 @@ public class PaxiumUpgradeSmithingRecipe implements SmithingRecipe {
         return addition;
     }
 
-    public FireMeterUpgrades.Stat getStat() {
+    public PaxiumUpgradeStat getStat() {
         return stat;
     }
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
         return template.test(input.template()) && base.test(input.base()) && addition.test(input.addition())
-                && PaxiumArmor.getUpgrades(input.base()).level(stat) < FireMeterUpgrades.MAX_LEVEL;
+                && stat.getLevel(input.base()) < PaxiumUpgradeStat.MAX_LEVEL;
     }
 
     @Override
@@ -63,9 +61,7 @@ public class PaxiumUpgradeSmithingRecipe implements SmithingRecipe {
 
     // Copies every other component (enchantments, damage, trims, the other stat) from the base.
     public ItemStack upgrade(ItemStack baseStack) {
-        ItemStack result = baseStack.copyWithCount(1);
-        result.set(ModDataComponents.FIRE_METER_UPGRADES.get(), PaxiumArmor.getUpgrades(baseStack).upgraded(stat));
-        return result;
+        return stat.upgraded(baseStack);
     }
 
     // Display only (recipe book/JEI): the first base item at level I.
@@ -106,7 +102,7 @@ public class PaxiumUpgradeSmithingRecipe implements SmithingRecipe {
                         Ingredient.CODEC.fieldOf("template").forGetter(PaxiumUpgradeSmithingRecipe::getTemplate),
                         Ingredient.CODEC.fieldOf("base").forGetter(PaxiumUpgradeSmithingRecipe::getBase),
                         Ingredient.CODEC.fieldOf("addition").forGetter(PaxiumUpgradeSmithingRecipe::getAddition),
-                        FireMeterUpgrades.Stat.CODEC.fieldOf("stat").forGetter(PaxiumUpgradeSmithingRecipe::getStat)
+                        PaxiumUpgradeStat.CODEC.fieldOf("stat").forGetter(PaxiumUpgradeSmithingRecipe::getStat)
                 ).apply(instance, PaxiumUpgradeSmithingRecipe::new)
         );
 
@@ -114,7 +110,7 @@ public class PaxiumUpgradeSmithingRecipe implements SmithingRecipe {
                 Ingredient.CONTENTS_STREAM_CODEC, PaxiumUpgradeSmithingRecipe::getTemplate,
                 Ingredient.CONTENTS_STREAM_CODEC, PaxiumUpgradeSmithingRecipe::getBase,
                 Ingredient.CONTENTS_STREAM_CODEC, PaxiumUpgradeSmithingRecipe::getAddition,
-                ByteBufCodecs.STRING_UTF8.map(FireMeterUpgrades.Stat::byName, FireMeterUpgrades.Stat::getName),
+                ByteBufCodecs.STRING_UTF8.map(PaxiumUpgradeStat::byName, PaxiumUpgradeStat::getName),
                 PaxiumUpgradeSmithingRecipe::getStat,
                 PaxiumUpgradeSmithingRecipe::new
         );
