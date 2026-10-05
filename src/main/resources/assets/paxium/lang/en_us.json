@@ -8,6 +8,9 @@
   "item.paxium.paxium_boots": "Paxium Boots",
   "item.paxium.paxium_sword": "Paxium Sword",
   "item.paxium.paxium_bow": "Paxium Bow",
+  "item.paxium.paxium_infused_crystal": "Paxium-Infused Crystal",
+  "item.paxium.unstable_paxium_charge": "Unstable Paxium Charge",
+  "item.paxium.refined_paxium_charge": "Refined Paxium Charge",
 
   "item.paxium.paxium_capacity_upgrade_smithing_template": "Capacity Upgrade Smithing Template",
   "item.paxium.paxium_recharge_upgrade_smithing_template": "Recharge Upgrade Smithing Template",
@@ -41,11 +44,21 @@
   "tooltip.paxium.sword_ignite": "Sets enemies ablaze on hit",
   "tooltip.paxium.sword_fire_beam": "Full set: Hold right-click to channel a fire beam (uses Fire Meter)",
   "tooltip.paxium.bow_fire_burst": "Full set: Explosive fire burst, breaks blocks (costs 100 Fire Meter)",
+  "tooltip.paxium.infused_crystal_refine": "Refine in the Starforge",
+  "tooltip.paxium.charge_stage": "Refinement stage %s of %s",
+  "tooltip.paxium.charge_refine": "Refine further in the Starforge",
+  "tooltip.paxium.bomb_ignite": "Ignite with flint and steel or redstone",
+  "tooltip.paxium.bomb_warning": "Devastating. Keep your distance.",
 
   "block.paxium.deepslate_paxium_ore": "Deepslate Paxium Ore",
   "block.paxium.starforge": "Starforge",
+  "block.paxium.paxium_bomb": "Paxium Bomb",
 
   "creativetab.paxium.paxium": "Paxium",
+
+  "entity.paxium.primed_paxium_bomb": "Primed Paxium Bomb",
+  "entity.paxium.paxium_blast": "Paxium Blast",
+  "entity.paxium.paxium_fire_burst": "Paxium Fire Burst",
 
   "gui.paxium.starforge.sky_obstructed": "Sky obstructed",
   "gui.paxium.starforge.charging": "Charging...",

@@ -12,7 +12,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.arro.paxium.component.ModDataComponents;
 import net.arro.paxium.entity.ModEntities;
+import net.arro.paxium.client.PaxiumClientHelper;
+import net.arro.paxium.entity.client.PaxiumBlastRenderer;
 import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
+import net.arro.paxium.entity.client.PrimedPaxiumBombRenderer;
 import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.ModCreativeModeTabs;
@@ -102,6 +105,8 @@ public class Paxium {
 
         if (FMLEnvironment.dist.isClient()) {
             modEventBus.register(ClientModEvents.class);
+            // Paxium Bomb camera shake.
+            NeoForge.EVENT_BUS.addListener(PaxiumClientHelper::onComputeCameraAngles);
         }
 
         // Register the item to a creative tab
@@ -153,6 +158,8 @@ public class Paxium {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.PAXIUM_FIRE_BURST.get(), PaxiumFireBurstRenderer::new);
+            event.registerEntityRenderer(ModEntities.PRIMED_PAXIUM_BOMB.get(), PrimedPaxiumBombRenderer::new);
+            event.registerEntityRenderer(ModEntities.PAXIUM_BLAST.get(), PaxiumBlastRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.STARFORGE_BE.get(), StarforgeBlockEntityRenderer::new);
         }
 

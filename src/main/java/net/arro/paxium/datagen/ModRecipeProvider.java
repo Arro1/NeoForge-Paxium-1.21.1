@@ -57,6 +57,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
         starforging(recipeOutput, Items.BLAZE_ROD, ModItems.PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE.get());
         starforging(recipeOutput, Items.FIRE_CHARGE, ModItems.PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE.get());
 
+        // Paxium Bomb: an End Crystal infused with Paxium, then refined three times in the Starforge.
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.PAXIUM_INFUSED_CRYSTAL.get())
+                .pattern("PPP")
+                .pattern("PEP")
+                .pattern("PPP")
+                .define('P', ModItems.PAXIUM.get())
+                .define('E', Items.END_CRYSTAL)
+                .unlockedBy("has_paxium", has(ModItems.PAXIUM))
+                .save(recipeOutput);
+        starforging(recipeOutput, ModItems.PAXIUM_INFUSED_CRYSTAL.get(), ModItems.UNSTABLE_PAXIUM_CHARGE.get());
+        starforging(recipeOutput, ModItems.UNSTABLE_PAXIUM_CHARGE.get(), ModItems.REFINED_PAXIUM_CHARGE.get());
+        starforging(recipeOutput, ModItems.REFINED_PAXIUM_CHARGE.get(), ModBlocks.PAXIUM_BOMB.get().asItem());
+
         Ingredient paxiumArmor = Ingredient.of(ModItems.PAXIUM_HELMET.get(), ModItems.PAXIUM_CHESTPLATE.get(),
                 ModItems.PAXIUM_LEGGINGS.get(), ModItems.PAXIUM_BOOTS.get());
         upgradeSmithing(recipeOutput, ModItems.PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE.get(), paxiumArmor,

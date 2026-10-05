@@ -2,6 +2,8 @@ package net.arro.paxium.event;
 
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.block.ModBlocks;
+import net.arro.paxium.item.ModItems;
 import net.arro.paxium.client.PaxiumClientHelper;
 import net.arro.paxium.component.FireMeterUpgrades;
 import net.arro.paxium.component.PaxiumUpgradeStat;
@@ -308,6 +310,27 @@ public class ModEvents {
             // If it does, add a new line of text to its tooltip
             event.getToolTip().add(Component.literal("Dangerously Hot!")
                     .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
+        }
+
+        if (stack.is(ModItems.PAXIUM_INFUSED_CRYSTAL.get())) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.infused_crystal_refine")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
+
+        if (stack.is(ModItems.UNSTABLE_PAXIUM_CHARGE.get()) || stack.is(ModItems.REFINED_PAXIUM_CHARGE.get())) {
+            int stage = stack.is(ModItems.UNSTABLE_PAXIUM_CHARGE.get()) ? 1 : 2;
+            event.getToolTip().add(Component.translatable("tooltip.paxium.charge_stage",
+                            Component.translatable("enchantment.level." + stage), Component.translatable("enchantment.level.3"))
+                    .withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(Component.translatable("tooltip.paxium.charge_refine")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
+
+        if (stack.is(ModBlocks.PAXIUM_BOMB.get().asItem())) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.bomb_ignite")
+                    .withStyle(ChatFormatting.RED));
+            event.getToolTip().add(Component.translatable("tooltip.paxium.bomb_warning")
+                    .withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
         }
 
         if (stack.getItem() instanceof PaxiumSwordItem) {

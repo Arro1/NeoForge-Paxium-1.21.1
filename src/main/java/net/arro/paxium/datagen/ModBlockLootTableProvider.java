@@ -21,6 +21,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
                 block -> createOreDrop(ModBlocks.DEEPSLATE_PAXIUM_ORE.get(), ModItems.RAW_PAXIUM.get()));
 
         dropSelf(ModBlocks.STARFORGE.get());
+        dropSelf(ModBlocks.PAXIUM_BOMB.get());
 
     }
 

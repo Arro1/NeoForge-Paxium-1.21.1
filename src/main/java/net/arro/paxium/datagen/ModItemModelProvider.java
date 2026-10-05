@@ -33,6 +33,10 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE.get());
         basicItem(ModItems.PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE.get());
         basicItem(ModItems.PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE.get());
+
+        basicItem(ModItems.PAXIUM_INFUSED_CRYSTAL.get());
+        basicItem(ModItems.UNSTABLE_PAXIUM_CHARGE.get());
+        basicItem(ModItems.REFINED_PAXIUM_CHARGE.get());
     }
 
     // Mirrors vanilla bow.json / bow_pulling_*.json: an "item/generated" base model carrying the

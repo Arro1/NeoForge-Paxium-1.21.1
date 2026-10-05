@@ -51,6 +51,15 @@ public class ModItems {
     public static final DeferredItem<PaxiumBowItem> PAXIUM_BOW = ITEMS.register("paxium_bow",
             () -> new PaxiumBowItem(new Item.Properties().fireResistant().rarity(Rarity.EPIC)));
 
+    // Paxium Bomb chain: End Crystal + 8 Paxium (crafting table) -> Paxium-Infused Crystal, then
+    // refined in the Starforge: Infused Crystal -> Unstable -> Refined -> Paxium Bomb.
+    public static final DeferredItem<Item> PAXIUM_INFUSED_CRYSTAL = ITEMS.register("paxium_infused_crystal",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.RARE).fireResistant()));
+    public static final DeferredItem<Item> UNSTABLE_PAXIUM_CHARGE = ITEMS.register("unstable_paxium_charge",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.RARE).fireResistant()));
+    public static final DeferredItem<Item> REFINED_PAXIUM_CHARGE = ITEMS.register("refined_paxium_charge",
+            () -> new Item(new Item.Properties().stacksTo(16).rarity(Rarity.RARE).fireResistant()));
+
     // Ghost icons for the armor templates' base slot.
     private static final List<ResourceLocation> ARMOR_ICONS = List.of(
             ResourceLocation.withDefaultNamespace("item/empty_armor_slot_helmet"),

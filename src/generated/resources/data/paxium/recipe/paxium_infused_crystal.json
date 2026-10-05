@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "minecraft:end_crystal"
+    },
+    "P": {
+      "item": "paxium:paxium"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "PEP",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "paxium:paxium_infused_crystal"
+  }
+}

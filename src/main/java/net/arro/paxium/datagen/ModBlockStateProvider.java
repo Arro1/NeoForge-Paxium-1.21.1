@@ -20,6 +20,9 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         blockWithItem(ModBlocks.DEEPSLATE_PAXIUM_ORE);
         starforgeBlock();
+
+        simpleBlockWithItem(ModBlocks.PAXIUM_BOMB.get(), models().cubeBottomTop("paxium_bomb",
+                modLoc("block/paxium_bomb_side"), modLoc("block/paxium_bomb_bottom"), modLoc("block/paxium_bomb_top")));
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock) {
