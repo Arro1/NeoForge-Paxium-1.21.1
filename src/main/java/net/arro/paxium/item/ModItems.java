@@ -4,8 +4,10 @@ import net.arro.paxium.Paxium;
 import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
@@ -13,6 +15,7 @@ import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.ModifyDefaultComponentsEvent;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -22,9 +25,9 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Paxium.MODID);
 
     public static final DeferredItem<Item> RAW_PAXIUM = ITEMS.register("raw_paxium",
-            () -> new Item(new Item.Properties()));
+            () -> new Item(new Item.Properties().fireResistant()));
     public static final DeferredItem<Item> PAXIUM = ITEMS.register("paxium",
-            () -> new Item(new Item.Properties()));
+            () -> new Item(new Item.Properties().fireResistant()));
 
     public static final DeferredItem<ArmorItem> PAXIUM_HELMET = ITEMS.register("paxium_helmet",
             () -> new ArmorItem(ModArmorMaterials.PAXIUM, ArmorItem.Type.HELMET,
@@ -96,7 +99,17 @@ public class ModItems {
                 List.of(ResourceLocation.withDefaultNamespace("item/empty_slot_ingot")));
     }
 
+    // SmithingTemplateItem builds its own Item.Properties, so the templates get fire resistance added afterwards.
+    private static void makeTemplatesFireResistant(ModifyDefaultComponentsEvent event) {
+        for (DeferredItem<SmithingTemplateItem> template : List.of(
+                PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE, PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE,
+                PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE, PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE)) {
+            event.modify(template.get(), builder -> builder.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE));
+        }
+    }
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
+        eventBus.addListener(ModItems::makeTemplatesFireResistant);
     }
 }
