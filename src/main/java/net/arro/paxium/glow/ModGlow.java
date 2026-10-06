@@ -27,7 +27,12 @@ public final class ModGlow {
     public record Entry(ResourceLocation base, ResourceLocation glow, GlowPalette palette) {
     }
 
+    /** Item model predicate: 1 while the holder has the item on cooldown. Registered in the client setup. */
+    public static final ResourceLocation ON_COOLDOWN = ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "on_cooldown");
+
     private static final Map<ResourceLocation, Entry> ENTRIES = new LinkedHashMap<>();
+    // base texture -> "dormant" variant with grey, unlit veins (shown while the item is on cooldown)
+    private static final Map<ResourceLocation, ResourceLocation> COOLDOWN_VARIANTS = new LinkedHashMap<>();
 
     static {
         // Netherite items with the standard red veins
@@ -51,6 +56,10 @@ public final class ModGlow {
         item("paxium_infused_crystal", GlowPalette.of(0xE20627, 0xCE0624, 0xB70520));
         item("unstable_paxium_charge", GlowPalette.of(0xE20627, 0xCE0624, 0xB70520));
         item("refined_paxium_charge", GlowPalette.of(0xFF2A2A, 0xFF4040, 0xD01010));
+
+        // Items whose veins go dark while on cooldown
+        cooldownItem("paxium_sword");
+        cooldownItem("paxium_bow");
 
         // Blocks
         block("deepslate_paxium_ore");
@@ -79,6 +88,23 @@ public final class ModGlow {
         ResourceLocation base = ResourceLocation.fromNamespaceAndPath(Paxium.MODID, path);
         ResourceLocation glow = ResourceLocation.fromNamespaceAndPath(Paxium.MODID, path + "_glow");
         ENTRIES.put(base, new Entry(base, glow, palette));
+    }
+
+    /**
+     * Also generates a grey "name_cooldown" texture (veins greyed out, no glow). The item model still has to switch
+     * to it, see {@code ModItemModelProvider#cooldownOverride} and the {@link #ON_COOLDOWN} item property.
+     */
+    public static void cooldownItem(String name) {
+        ResourceLocation base = ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "item/" + name);
+        COOLDOWN_VARIANTS.put(base, ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "item/" + name + "_cooldown"));
+    }
+
+    public static Optional<ResourceLocation> getCooldownVariant(ResourceLocation baseTexture) {
+        return Optional.ofNullable(COOLDOWN_VARIANTS.get(baseTexture));
+    }
+
+    public static Map<ResourceLocation, ResourceLocation> cooldownVariants() {
+        return COOLDOWN_VARIANTS;
     }
 
     public static Optional<Entry> get(ResourceLocation baseTexture) {

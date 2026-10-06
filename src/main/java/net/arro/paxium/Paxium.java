@@ -8,6 +8,7 @@ import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
 import net.arro.paxium.client.PaxiumArmPoses;
 import net.arro.paxium.client.render.PaxiumArmorGlowLayer;
+import net.arro.paxium.glow.ModGlow;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -43,6 +44,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -54,6 +56,8 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 import com.mojang.logging.LogUtils;
 
@@ -210,6 +214,12 @@ public class Paxium {
                             return entity.getUseItem() != stack ? 0.0F
                                     : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20.0F;
                         });
+                // Grey, unlit veins while the sword/bow is on cooldown (see ModGlow#cooldownItem).
+                for (Item item : List.of(ModItems.PAXIUM_SWORD.get(), ModItems.PAXIUM_BOW.get())) {
+                    ItemProperties.register(item, ModGlow.ON_COOLDOWN,
+                            (stack, level, entity, seed) -> entity instanceof Player player
+                                    && player.getCooldowns().isOnCooldown(stack.getItem()) ? 1.0F : 0.0F);
+                }
                 ItemProperties.register(ModItems.PAXIUM_BOW.get(), ResourceLocation.withDefaultNamespace("pulling"),
                         (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack
                                 ? 1.0F : 0.0F);

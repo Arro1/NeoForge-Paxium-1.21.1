@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-06T19:27:47.9960745	Paxium glow textures
+// 1.21.1	2026-10-06T19:41:04.2511951	Paxium glow textures
 2c7d1dac18c60c7b9fb4b99578d7028587657009 assets/paxium/textures/block/deepslate_paxium_ore_glow.png
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/block/deepslate_paxium_ore_glow.png.mcmeta
 d13512cce7ad65075cc2a9ac99e65dab04cda4fb assets/paxium/textures/block/paxium_bomb_side_glow.png
@@ -11,6 +11,7 @@ be38a544b0b0c78aa8d6d5d8b26b84afb69a0dc5 assets/paxium/textures/item/paxium_blas
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_blast_upgrade_smithing_template_glow.png.mcmeta
 a4c9243f23eb992c5b531f59adcdbe650401df94 assets/paxium/textures/item/paxium_boots_glow.png
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_boots_glow.png.mcmeta
+e8231c5f3144c826e7044cbd398b2bf142770a2a assets/paxium/textures/item/paxium_bow_cooldown.png
 b7fd559adcfa929f67fc5e1eb84fe7ee89d1afa3 assets/paxium/textures/item/paxium_bow_glow.png
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_bow_glow.png.mcmeta
 b7fd559adcfa929f67fc5e1eb84fe7ee89d1afa3 assets/paxium/textures/item/paxium_bow_pulling_0_glow.png
@@ -33,6 +34,7 @@ d1724970c80d692c73ec5b53edd6b626747ffd14 assets/paxium/textures/item/paxium_glow
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_leggings_glow.png.mcmeta
 8d87a8755bac75f4aec28815babf631be69a7b80 assets/paxium/textures/item/paxium_recharge_upgrade_smithing_template_glow.png
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_recharge_upgrade_smithing_template_glow.png.mcmeta
+c9293019d3cc70d2ad6bc014c1bcbb7d5055d56c assets/paxium/textures/item/paxium_sword_cooldown.png
 cc929dfea5e01db240c96126267e4e7883759e79 assets/paxium/textures/item/paxium_sword_glow.png
 0498b85fb8589ccaa789474bb72973ca6788b34f assets/paxium/textures/item/paxium_sword_glow.png.mcmeta
 6f8a13db201b7acecc58a6bad714705e79310889 assets/paxium/textures/item/raw_paxium_glow.png

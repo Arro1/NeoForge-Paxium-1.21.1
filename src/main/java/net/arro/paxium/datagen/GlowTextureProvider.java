@@ -5,6 +5,7 @@ import net.arro.paxium.glow.ModGlow;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.IntPredicate;
 
@@ -37,6 +39,9 @@ public class GlowTextureProvider implements DataProvider {
         for (ModGlow.Entry entry : ModGlow.all()) {
             existingFileHelper.trackGenerated(entry.glow(), PackType.CLIENT_RESOURCES, ".png", "textures");
         }
+        for (ResourceLocation variant : ModGlow.cooldownVariants().values()) {
+            existingFileHelper.trackGenerated(variant, PackType.CLIENT_RESOURCES, ".png", "textures");
+        }
     }
 
     @Override
@@ -56,6 +61,14 @@ public class GlowTextureProvider implements DataProvider {
                         .getBytes(StandardCharsets.UTF_8);
                 cache.writeIfNeeded(pngPath.resolveSibling(pngPath.getFileName() + ".mcmeta"), meta,
                         Hashing.sha1().hashBytes(meta));
+            }
+
+            for (Map.Entry<ResourceLocation, ResourceLocation> variant : ModGlow.cooldownVariants().entrySet()) {
+                ModGlow.Entry entry = ModGlow.get(variant.getKey()).orElseThrow(() ->
+                        new IOException("Cooldown variant without a glow entry: " + variant.getKey()));
+                byte[] png = encode(greyOut(loadBase(entry), entry.palette()::matches));
+                cache.writeIfNeeded(assets.resolve(variant.getValue().getNamespace())
+                        .resolve("textures/" + variant.getValue().getPath() + ".png"), png, Hashing.sha1().hashBytes(png));
             }
         } catch (IOException e) {
             return CompletableFuture.failedFuture(new UncheckedIOException(e));
@@ -105,6 +118,23 @@ public class GlowTextureProvider implements DataProvider {
             }
         }
         return strip;
+    }
+
+    /** Replaces vein pixels with a dark, near-black grey that keeps their relative shading, so the item looks dormant. */
+    private static BufferedImage greyOut(BufferedImage base, IntPredicate isVein) {
+        BufferedImage out = new BufferedImage(base.getWidth(), base.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < base.getHeight(); y++) {
+            for (int x = 0; x < base.getWidth(); x++) {
+                int argb = base.getRGB(x, y);
+                if ((argb >>> 24) != 0 && isVein.test(argb)) {
+                    double lum = 0.3 * ((argb >> 16) & 0xFF) + 0.59 * ((argb >> 8) & 0xFF) + 0.11 * (argb & 0xFF);
+                    int grey = clamp(lum * 0.18 + 8);
+                    argb = (argb & 0xFF000000) | grey << 16 | grey << 8 | Math.min(255, grey + 4);
+                }
+                out.setRGB(x, y, argb);
+            }
+        }
+        return out;
     }
 
     private static boolean touchesSilhouette(BufferedImage image, int x, int y) {

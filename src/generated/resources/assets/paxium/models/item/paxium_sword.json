@@ -10,6 +10,14 @@
       }
     }
   },
+  "overrides": [
+    {
+      "model": "paxium:item/paxium_sword_cooldown",
+      "predicate": {
+        "paxium:on_cooldown": 1.0
+      }
+    }
+  ],
   "textures": {
     "layer0": "paxium:item/paxium_sword",
     "layer1": "paxium:item/paxium_sword_glow"

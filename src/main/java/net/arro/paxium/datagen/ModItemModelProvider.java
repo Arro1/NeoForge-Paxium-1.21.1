@@ -28,7 +28,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         glowItem(ModItems.PAXIUM_LEGGINGS.get(), "item/generated");
         glowItem(ModItems.PAXIUM_BOOTS.get(), "item/generated");
 
-        glowItem(ModItems.PAXIUM_SWORD.get(), "item/handheld");
+        cooldownOverride(glowItem(ModItems.PAXIUM_SWORD.get(), "item/handheld"), "paxium_sword", "item/handheld");
 
         paxiumBow();
 
@@ -59,14 +59,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         return builder;
     }
 
-    // Mirrors vanilla bow.json / bow_pulling_*.json: an "item/generated" base model carrying the
-    // bow's own hand-pose transforms, with three draw-stage overrides swapped in via the vanilla
-    // "pulling"/"pull" item properties while PaxiumBowItem's draw is held.
-    private void paxiumBow() {
-        ItemModelBuilder bow = getBuilder("paxium_bow")
-                .parent(new ModelFile.UncheckedModelFile("item/generated"));
-        withGlow(bow, modLoc("item/paxium_bow"));
-
+    private static void bowTransforms(ItemModelBuilder bow) {
         bow.transforms()
                 .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
                     .rotation(-80, 260, -40).translation(-1, -2, 2.5F).scale(0.9F)
@@ -81,6 +74,30 @@ public class ModItemModelProvider extends ItemModelProvider {
                     .rotation(0, 90, -25).translation(1.13F, 3.2F, 1.13F).scale(0.68F)
                     .end()
                 .end();
+    }
+
+    // While the item is on cooldown, swap to its grey "dormant" texture (generated, see ModGlow#cooldownItem).
+    private void cooldownOverride(ItemModelBuilder model, String name, String parent) {
+        ResourceLocation base = modLoc("item/" + name);
+        ModGlow.getCooldownVariant(base).ifPresent(variant -> {
+            ItemModelBuilder dormant = getBuilder(name + "_cooldown")
+                    .parent(new ModelFile.UncheckedModelFile(parent)).texture("layer0", variant);
+            if (name.equals("paxium_bow")) {
+                bowTransforms(dormant);
+            }
+            model.override().predicate(ModGlow.ON_COOLDOWN, 1.0F).model(dormant).end();
+        });
+    }
+
+    // Mirrors vanilla bow.json / bow_pulling_*.json: an "item/generated" base model carrying the
+    // bow's own hand-pose transforms, with three draw-stage overrides swapped in via the vanilla
+    // "pulling"/"pull" item properties while PaxiumBowItem's draw is held.
+    private void paxiumBow() {
+        ItemModelBuilder bow = getBuilder("paxium_bow")
+                .parent(new ModelFile.UncheckedModelFile("item/generated"));
+        withGlow(bow, modLoc("item/paxium_bow"));
+
+        bowTransforms(bow);
 
         ItemModelBuilder pulling0 = withGlow(getBuilder("paxium_bow_pulling_0").parent(bow),
                 modLoc("item/paxium_bow_pulling_0"));
@@ -89,6 +106,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         ItemModelBuilder pulling2 = withGlow(getBuilder("paxium_bow_pulling_2").parent(bow),
                 modLoc("item/paxium_bow_pulling_2"));
 
+        cooldownOverride(bow, "paxium_bow", "item/generated");
         bow.override()
                 .predicate(ResourceLocation.withDefaultNamespace("pulling"), 1.0F)
                 .model(pulling0).end();

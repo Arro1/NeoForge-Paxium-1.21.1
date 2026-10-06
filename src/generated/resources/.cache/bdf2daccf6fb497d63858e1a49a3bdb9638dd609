@@ -1,9 +1,10 @@
-// 1.21.1	2026-10-06T19:19:41.4423689	Item Models: paxium
+// 1.21.1	2026-10-06T19:38:45.3322085	Item Models: paxium
 31377e3f3e1542a5af432fc8425bf48554cba62f assets/paxium/models/item/paxium.json
 d87098147c3d74281a7b84632d23771735571fa4 assets/paxium/models/item/paxium_beam_damage_upgrade_smithing_template.json
 92f6c65be11373bc7ca0f590bac3ac7d37712436 assets/paxium/models/item/paxium_blast_upgrade_smithing_template.json
 279cf92afb7b7654dac10e1cfe7f9052791f9399 assets/paxium/models/item/paxium_boots.json
-8229e256bad9c10181df6343517e29efd73f4e17 assets/paxium/models/item/paxium_bow.json
+a4e90a326bc6e5720abb7e18cf30e076809b4b28 assets/paxium/models/item/paxium_bow.json
+5df92d93455436881dd1ed192f62d5f3a705bbf4 assets/paxium/models/item/paxium_bow_cooldown.json
 3d6af20417dca49e570e1f68354b856602a9b9ba assets/paxium/models/item/paxium_bow_pulling_0.json
 200a40753249dbe88ea33ceaf7db0e30439344b2 assets/paxium/models/item/paxium_bow_pulling_1.json
 0dafd4877e45e555931e183f63223b5c46ed3163 assets/paxium/models/item/paxium_bow_pulling_2.json
@@ -13,7 +14,8 @@ cd4f6b32786fe9734d039e0899cb91ee173baeca assets/paxium/models/item/paxium_chestp
 7bf2c293dcfceba56fd32afeed7b7cd095e7a4f6 assets/paxium/models/item/paxium_infused_crystal.json
 d490803e1698c1630680c51334ce8e92ab4672cd assets/paxium/models/item/paxium_leggings.json
 1080e8e27d613d9cacd4f56171a5beb29557625e assets/paxium/models/item/paxium_recharge_upgrade_smithing_template.json
-cec6c6ab8d274dae5bf0b394cd7347bf0fcf5121 assets/paxium/models/item/paxium_sword.json
+9e03cf4ab6f20e566ce596e72049c7ff5001bce2 assets/paxium/models/item/paxium_sword.json
+5cca762ce0591e25513f97b86ec54430a02a92a6 assets/paxium/models/item/paxium_sword_cooldown.json
 5b804a0581a955af41d6e961d17b8553b623b220 assets/paxium/models/item/raw_paxium.json
 37bb199fb6853f5a888a0b60d7d85f6533a243f3 assets/paxium/models/item/refined_paxium_charge.json
 b66336845a2b2d10a510b9d9cd04c2acccc47a71 assets/paxium/models/item/unstable_paxium_charge.json
