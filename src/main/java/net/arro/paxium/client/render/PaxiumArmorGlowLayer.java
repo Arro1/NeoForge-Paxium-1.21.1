@@ -4,7 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.util.PaxiumArmor;
+import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -28,7 +31,11 @@ public class PaxiumArmorGlowLayer<T extends LivingEntity, M extends HumanoidMode
     private static final EquipmentSlot[] SLOTS =
             {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
-    private static final float GLOW_SCALE = 1.006F;
+    // Vanilla armor deformations (inner = leggings, outer = everything else) plus a hair, so the glow shell sits
+    // the same tiny distance in front of the base armor everywhere instead of z-fighting with it.
+    private static final float GLOW_EXPANSION = 0.06F;
+    private static final CubeDeformation INNER_DEFORMATION = new CubeDeformation(0.5F + GLOW_EXPANSION);
+    private static final CubeDeformation OUTER_DEFORMATION = new CubeDeformation(1.0F + GLOW_EXPANSION);
 
     private final HumanoidModel<T> innerModel;
     private final HumanoidModel<T> outerModel;
@@ -37,6 +44,17 @@ public class PaxiumArmorGlowLayer<T extends LivingEntity, M extends HumanoidMode
         super(parent);
         this.innerModel = innerModel;
         this.outerModel = outerModel;
+    }
+
+    /** Armor model for the glow shell of a standard humanoid (players, zombies, skeletons). */
+    public static <E extends LivingEntity> HumanoidModel<E> humanoidModel(boolean inner) {
+        return new HumanoidModel<>(LayerDefinition.create(
+                HumanoidModel.createMesh(inner ? INNER_DEFORMATION : OUTER_DEFORMATION, 0.0F), 64, 32).bakeRoot());
+    }
+
+    public static ArmorStandArmorModel armorStandModel(boolean inner) {
+        return new ArmorStandArmorModel(
+                ArmorStandArmorModel.createBodyLayer(inner ? INNER_DEFORMATION : OUTER_DEFORMATION).bakeRoot());
     }
 
     private static ResourceLocation glowTexture(int layer) {
@@ -60,11 +78,7 @@ public class PaxiumArmorGlowLayer<T extends LivingEntity, M extends HumanoidMode
             VertexConsumer glow = new GlowVertexConsumer(
                     buffer.getBuffer(RenderType.eyes(inner ? INNER_GLOW : OUTER_GLOW)),
                     entity.tickCount + partialTicks, slot.getIndex() * 1.7F, fullSet);
-            // Inflate slightly so the glow sits in front of the base armor instead of z-fighting with it.
-            poseStack.pushPose();
-            poseStack.scale(GLOW_SCALE, GLOW_SCALE, GLOW_SCALE);
             model.renderToBuffer(poseStack, glow, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, -1);
-            poseStack.popPose();
         }
     }
 
