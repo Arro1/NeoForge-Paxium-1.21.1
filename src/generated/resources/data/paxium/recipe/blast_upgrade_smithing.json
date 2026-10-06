@@ -1,0 +1,13 @@
+{
+  "type": "paxium:armor_upgrade_smithing",
+  "addition": {
+    "item": "paxium:paxium"
+  },
+  "base": {
+    "item": "paxium:paxium_bow"
+  },
+  "stat": "blast",
+  "template": {
+    "item": "paxium:paxium_blast_upgrade_smithing_template"
+  }
+}

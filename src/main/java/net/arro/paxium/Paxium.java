@@ -5,8 +5,28 @@ import com.mojang.math.Axis;
 import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
+import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
+import net.arro.paxium.client.PaxiumArmPoses;
+import net.arro.paxium.client.render.PaxiumArmorGlowLayer;
+import net.arro.paxium.client.particle.FlightFlameParticle;
+import net.arro.paxium.glow.ModGlow;
+import net.arro.paxium.particle.ModParticles;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.ArmorStandRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.SkeletonRenderer;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.arro.paxium.component.ModDataComponents;
 import net.arro.paxium.entity.ModEntities;
+import net.arro.paxium.client.PaxiumClientHelper;
+import net.arro.paxium.entity.client.PaxiumBlastRenderer;
 import net.arro.paxium.entity.client.PaxiumFireBurstRenderer;
+import net.arro.paxium.entity.client.PrimedPaxiumBombRenderer;
 import net.arro.paxium.event.ModEvents;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.ModCreativeModeTabs;
@@ -26,17 +46,21 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 import com.mojang.logging.LogUtils;
 
@@ -76,6 +100,7 @@ public class Paxium {
 
         ModCreativeModeTabs.register(modEventBus);
 
+        ModDataComponents.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
@@ -87,6 +112,7 @@ public class Paxium {
         ModEntities.register(modEventBus);
 
         ModAttachmentTypes.register(modEventBus);
+        ModParticles.register(modEventBus);
 
         ModMenuTypes.register(modEventBus);
 
@@ -95,6 +121,8 @@ public class Paxium {
 
         if (FMLEnvironment.dist.isClient()) {
             modEventBus.register(ClientModEvents.class);
+            // Paxium Bomb camera shake.
+            NeoForge.EVENT_BUS.addListener(PaxiumClientHelper::onComputeCameraAngles);
         }
 
         // Register the item to a creative tab
@@ -129,13 +157,13 @@ public class Paxium {
     }
 
     public static class ClientModEvents {
-        private static final ResourceLocation FLIGHT_FUEL_BAR_BACKGROUND_SPRITE =
+        private static final ResourceLocation FIRE_METER_BAR_BACKGROUND_SPRITE =
                 ResourceLocation.withDefaultNamespace("hud/experience_bar_background");
-        private static final ResourceLocation FLIGHT_FUEL_BAR_PROGRESS_SPRITE =
+        private static final ResourceLocation FIRE_METER_BAR_PROGRESS_SPRITE =
                 ResourceLocation.withDefaultNamespace("hud/experience_bar_progress");
 
         // How far to push the XP bar / health / armor / food / air / etc. up, to make
-        // room for the flight fuel bar directly above the hotbar.
+        // room for the Fire Meter bar directly above the hotbar.
         private static final float HUD_SHIFT_PX = 9.0F;
 
         @SubscribeEvent
@@ -144,8 +172,41 @@ public class Paxium {
         }
 
         @SubscribeEvent
+        public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
+            event.registerSpriteSet(ModParticles.FLIGHT_FLAME.get(), FlightFlameParticle.Provider::new);
+        }
+
+        @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.PAXIUM_FIRE_BURST.get(), PaxiumFireBurstRenderer::new);
+            event.registerEntityRenderer(ModEntities.PRIMED_PAXIUM_BOMB.get(), PrimedPaxiumBombRenderer::new);
+            event.registerEntityRenderer(ModEntities.PAXIUM_BLAST.get(), PaxiumBlastRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.STARFORGE_BE.get(), StarforgeBlockEntityRenderer::new);
+        }
+
+        // Glowing, animated fire veins on worn Paxium armor (players, armor stands, armored zombies/skeletons).
+        @SubscribeEvent
+        public static void addArmorGlowLayers(EntityRenderersEvent.AddLayers event) {
+            for (PlayerSkin.Model skin : event.getSkins()) {
+                if (event.getSkin(skin) instanceof PlayerRenderer renderer) {
+                    addGlowLayer(renderer);
+                }
+            }
+            if (event.getRenderer(EntityType.ARMOR_STAND) instanceof ArmorStandRenderer renderer) {
+                renderer.addLayer(new PaxiumArmorGlowLayer<>(renderer,
+                        PaxiumArmorGlowLayer.armorStandModel(true), PaxiumArmorGlowLayer.armorStandModel(false)));
+            }
+            if (event.getRenderer(EntityType.ZOMBIE) instanceof ZombieRenderer renderer) {
+                addGlowLayer(renderer);
+            }
+            if (event.getRenderer(EntityType.SKELETON) instanceof SkeletonRenderer renderer) {
+                addGlowLayer(renderer);
+            }
+        }
+
+        private static <T extends LivingEntity, M extends HumanoidModel<T>> void addGlowLayer(LivingEntityRenderer<T, M> renderer) {
+            renderer.addLayer(new PaxiumArmorGlowLayer<>(renderer,
+                    PaxiumArmorGlowLayer.<T>humanoidModel(true), PaxiumArmorGlowLayer.<T>humanoidModel(false)));
         }
 
         // Vanilla only wires the "pulling"/"pull" item-property functions to the literal Items.BOW
@@ -162,14 +223,20 @@ public class Paxium {
                             return entity.getUseItem() != stack ? 0.0F
                                     : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20.0F;
                         });
+                // Grey, unlit veins while the sword/bow is on cooldown (see ModGlow#cooldownItem).
+                for (Item item : List.of(ModItems.PAXIUM_SWORD.get(), ModItems.PAXIUM_BOW.get())) {
+                    ItemProperties.register(item, ModGlow.ON_COOLDOWN,
+                            (stack, level, entity, seed) -> entity instanceof Player player
+                                    && player.getCooldowns().isOnCooldown(stack.getItem()) ? 1.0F : 0.0F);
+                }
                 ItemProperties.register(ModItems.PAXIUM_BOW.get(), ResourceLocation.withDefaultNamespace("pulling"),
                         (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack
                                 ? 1.0F : 0.0F);
             });
         }
 
-        // The vanilla SPEAR use-pose (trident wind-up) translates the item wildly upward/back and looks
-        // broken on a sword - replace the first-person hand pose entirely with a gentle forward tilt.
+        // Fire-beam channel pose. First person: replace the hand pose entirely with a gentle forward tilt.
+        // Third person: a custom arm pose (the sword's UseAnim is NONE so PlayerRenderer reaches getArmPose).
         @SubscribeEvent
         public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
             event.registerItem(new IClientItemExtensions() {
@@ -183,9 +250,15 @@ public class Paxium {
                     int side = arm == HumanoidArm.RIGHT ? 1 : -1;
                     // Same base "held in hand" offset vanilla applies before any use-animation extras.
                     poseStack.translate(side * 0.56F, -0.52F + equipProcess * -0.6F, -0.72F);
-                    // Tilt the tip forward/down instead of SPEAR's exaggerated pull-back.
+                    // Tilt the tip slightly forward/down while channeling.
                     poseStack.mulPose(Axis.XP.rotationDegrees(-20.0F));
                     return true;
+                }
+
+                // Third person (others, or F5): arm raised forward as if aiming the beam.
+                @Override
+                public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack) {
+                    return entity.isUsingItem() && entity.getUseItem() == stack ? PaxiumArmPoses.FIRE_BEAM.getValue() : null;
                 }
             }, ModItems.PAXIUM_SWORD.get());
         }
@@ -204,13 +277,13 @@ public class Paxium {
 
             event.registerAbove(
                     VanillaGuiLayers.AIR_LEVEL,
-                    ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "flight_fuel_bar"),
-                    (guiGraphics, deltaTracker) -> renderFlightFuelBar(guiGraphics));
+                    ResourceLocation.fromNamespaceAndPath(Paxium.MODID, "fire_meter_bar"),
+                    (guiGraphics, deltaTracker) -> renderFireMeterBar(guiGraphics));
         }
 
         private static LayeredDraw.Layer shiftedUp(LayeredDraw.Layer original) {
             return (guiGraphics, deltaTracker) -> {
-                if (isFlightFuelBarShown()) {
+                if (isFireMeterBarShown()) {
                     guiGraphics.pose().pushPose();
                     guiGraphics.pose().translate(0.0F, -HUD_SHIFT_PX, 0.0F);
                     original.render(guiGraphics, deltaTracker);
@@ -221,28 +294,29 @@ public class Paxium {
             };
         }
 
-        private static boolean isFlightFuelBarShown() {
+        private static boolean isFireMeterBarShown() {
             Player player = Minecraft.getInstance().player;
-            return player != null && PaxiumArmor.hasFullSet(player);
+            return player != null && !player.isSpectator() && PaxiumArmor.hasFullSet(player);
         }
 
-        private static void renderFlightFuelBar(GuiGraphics guiGraphics) {
-            if (!isFlightFuelBarShown()) {
+        private static void renderFireMeterBar(GuiGraphics guiGraphics) {
+            if (!isFireMeterBarShown()) {
                 return;
             }
 
             Player player = Minecraft.getInstance().player;
-            int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-            int filledWidth = Math.round((float) fuel / ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS * 182.0F);
+            float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+            int capacity = PaxiumArmor.getFireMeterCapacity(player);
+            int filledWidth = Math.round(Math.min(1.0F, meter / capacity) * 182.0F);
 
             int x = guiGraphics.guiWidth() / 2 - 91;
             int y = guiGraphics.guiHeight() - 30;
 
             guiGraphics.setColor(1.0F, 0.5F, 0.0F, 1.0F);
-            guiGraphics.blitSprite(FLIGHT_FUEL_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
+            guiGraphics.blitSprite(FIRE_METER_BAR_BACKGROUND_SPRITE, x, y, 182, 5);
             if (filledWidth > 0) {
                 guiGraphics.setColor(1.0F, 0.65F, 0.05F, 1.0F);
-                guiGraphics.blitSprite(FLIGHT_FUEL_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
+                guiGraphics.blitSprite(FIRE_METER_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, x, y, filledWidth, 5);
             }
             guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
         }

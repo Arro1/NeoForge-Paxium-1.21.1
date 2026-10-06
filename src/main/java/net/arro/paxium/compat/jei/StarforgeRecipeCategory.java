@@ -11,6 +11,7 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.arro.paxium.Paxium;
 import net.arro.paxium.block.ModBlocks;
+import net.arro.paxium.block.entity.StarforgeBlockEntity;
 import net.arro.paxium.recipe.StarforgeRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -40,10 +41,9 @@ public class StarforgeRecipeCategory implements IRecipeCategory<StarforgeRecipe>
     public StarforgeRecipeCategory(IGuiHelper guiHelper) {
         this.background = guiHelper.createDrawable(GUI_TEXTURE, OFFSET_X, OFFSET_Y, WIDTH, HEIGHT);
         this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.STARFORGE.get()));
-        // 80 ticks matches StarforgeBlockEntity's maxProgress
         this.arrow = guiHelper.drawableBuilder(ARROW_TEXTURE, 0, 0, 24, 16)
                 .setTextureSize(24, 16)
-                .buildAnimated(80, IDrawableAnimated.StartDirection.LEFT, false);
+                .buildAnimated(StarforgeBlockEntity.CRAFT_TIME, IDrawableAnimated.StartDirection.LEFT, false);
     }
 
     @Override
@@ -71,10 +71,10 @@ public class StarforgeRecipeCategory implements IRecipeCategory<StarforgeRecipe>
         return HEIGHT;
     }
 
-    // Slot order must match the Starforge menu slots (paxium, dragon breath, nether star) for recipe transfer.
+    // Slot order must match the Starforge menu slots (base, dragon breath, nether star) for recipe transfer.
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, StarforgeRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 34 - OFFSET_Y).addIngredients(recipe.getPaxium());
+        builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 34 - OFFSET_Y).addIngredients(recipe.getBase());
         builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 52 - OFFSET_Y).addIngredients(recipe.getDragonBreath());
         builder.addSlot(RecipeIngredientRole.INPUT, 54 - OFFSET_X, 16 - OFFSET_Y).addIngredients(recipe.getNetherStar());
         builder.addSlot(RecipeIngredientRole.OUTPUT, 104 - OFFSET_X, 34 - OFFSET_Y)

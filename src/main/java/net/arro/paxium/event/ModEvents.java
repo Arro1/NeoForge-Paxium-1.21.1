@@ -2,6 +2,13 @@ package net.arro.paxium.event;
 
 import net.arro.paxium.Paxium;
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.block.ModBlocks;
+import net.arro.paxium.item.ModItems;
+import net.arro.paxium.client.PaxiumClientHelper;
+import net.arro.paxium.client.PaxiumFlightEffects;
+import net.arro.paxium.component.FireMeterUpgrades;
+import net.arro.paxium.component.PaxiumUpgradeStat;
+import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
 import net.arro.paxium.item.ModArmorMaterials;
 import net.arro.paxium.item.custom.PaxiumBowItem;
 import net.arro.paxium.item.custom.PaxiumSwordItem;
@@ -10,11 +17,13 @@ import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,6 +41,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -46,12 +56,14 @@ public class ModEvents {
     private static final AttributeModifier FLIGHT_MODIFIER =
             new AttributeModifier(FLIGHT_MODIFIER_ID, 1.0, AttributeModifier.Operation.ADD_VALUE);
 
-    // Players who flew and haven't touched the ground since - fuel stays frozen mid-fall until they land.
+    // Players who flew and haven't touched the ground since - the Fire Meter stays frozen mid-fall until they land.
     private static final Set<UUID> AWAITING_LANDING = new HashSet<>();
 
     private static final double FIRE_BEAM_RANGE = 20.0;
-    private static final int FIRE_BEAM_FUEL_PER_TICK = 2;
+    private static final float FIRE_BEAM_METER_PER_TICK = 2.0F;
     private static final float FIRE_BEAM_DAMAGE = 6.0F;
+    // Per Beam Damage level on the sword; meter drain is unaffected.
+    public static final float BEAM_DAMAGE_PER_LEVEL = 2.0F;
 
     @SubscribeEvent
     public void onPlayerTick(PlayerTickEvent.Post event) {
@@ -67,8 +79,10 @@ public class ModEvents {
 
         if (player.isCreative()) {
             // Creative already has free flight/immortality; only the beam matters here, and it
-            // should fire indefinitely without touching the fuel meter at all.
+            // should fire indefinitely without touching the Fire Meter at all.
             updateFireBeamCreative(player);
+            // Vanilla creative flight, but the armor's wings should still show.
+            setFlying(player, PaxiumArmor.hasFullSet(player) && player.getAbilities().flying);
             return;
         }
 
@@ -83,6 +97,7 @@ public class ModEvents {
         }
 
         setFlightAllowed(player, false);
+        setFlying(player, false);
         stopFireBeamIfChanneling(player);
 
         for (ItemStack stack : player.getInventory().items) {
@@ -96,30 +111,46 @@ public class ModEvents {
     }
 
     private static void updateFlight(Player player, boolean channelingBeam) {
-        int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-        int updatedFuel = fuel;
+        float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+        int capacity = PaxiumArmor.getFireMeterCapacity(player);
+        // Clamp first so swapping in a lower-capacity piece trims an overfull meter.
+        float updatedMeter = Math.min(meter, capacity);
 
         UUID id = player.getUUID();
 
         if (player.getAbilities().flying) {
-            updatedFuel = Math.max(0, fuel - 1);
+            updatedMeter = Math.max(0.0F, updatedMeter - 1.0F);
             AWAITING_LANDING.add(id);
-        } else if (AWAITING_LANDING.contains(id) && !player.onGround()) {
+        } else if (AWAITING_LANDING.contains(id) && !hasLanded(player)) {
             // Still falling after flight ended - hold off on regenerating until they land.
         } else {
             AWAITING_LANDING.remove(id);
             // Don't passively regenerate while the beam is actively draining the same pool this
             // tick - otherwise the two fight each other and the meter never settles at 0.
             if (!channelingBeam) {
-                updatedFuel = Math.min(ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS, fuel + 1);
+                updatedMeter = Math.min(capacity, updatedMeter + PaxiumArmor.getFireMeterRechargeRate(player));
             }
         }
 
-        if (updatedFuel != fuel) {
-            player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), updatedFuel);
+        if (updatedMeter != meter) {
+            player.setData(ModAttachmentTypes.FIRE_METER.get(), updatedMeter);
         }
 
-        setFlightAllowed(player, updatedFuel > 0);
+        setFlightAllowed(player, updatedMeter > 0.0F);
+        setFlying(player, player.getAbilities().flying);
+    }
+
+    // Only writes on change, so the attachment sync packet is sent when flight starts or stops, not every tick.
+    private static void setFlying(Player player, boolean flying) {
+        if (player.getData(ModAttachmentTypes.FLYING.get()) != flying) {
+            player.setData(ModAttachmentTypes.FLYING.get(), flying);
+        }
+    }
+
+    // onGround() alone never turns true in water, on ladders/vines or on a mount, which used to freeze the
+    // recharge forever after flying over those.
+    private static boolean hasLanded(Player player) {
+        return player.onGround() || player.isInWater() || player.onClimbable() || player.isPassenger();
     }
 
     private static void setFlightAllowed(Player player, boolean allowed) {
@@ -155,7 +186,7 @@ public class ModEvents {
             return;
         }
 
-        // No fuel read/write at all - indefinite beam in creative.
+        // No Fire Meter read/write at all - indefinite beam in creative.
         fireBeamTick(player);
     }
 
@@ -164,13 +195,13 @@ public class ModEvents {
             return;
         }
 
-        int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-        if (fuel <= 0) {
+        float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+        if (meter <= 0.0F) {
             player.stopUsingItem();
             return;
         }
 
-        player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), Math.max(0, fuel - FIRE_BEAM_FUEL_PER_TICK));
+        player.setData(ModAttachmentTypes.FIRE_METER.get(), Math.max(0.0F, meter - FIRE_BEAM_METER_PER_TICK));
         fireBeamTick(player);
     }
 
@@ -187,11 +218,14 @@ public class ModEvents {
             end = blockHit.getLocation();
         }
 
+        float damage = FIRE_BEAM_DAMAGE
+                + BEAM_DAMAGE_PER_LEVEL * PaxiumUpgradeStat.BEAM_DAMAGE.getLevel(player.getUseItem());
+
         AABB sweep = new AABB(start, end).inflate(1.0);
         for (Entity candidate : level.getEntities(player, sweep, e -> e instanceof LivingEntity living && living.isAlive())) {
             if (candidate.getBoundingBox().clip(start, end).isPresent()) {
                 LivingEntity target = (LivingEntity) candidate;
-                boolean damaged = target.hurt(level.damageSources().playerAttack(player), FIRE_BEAM_DAMAGE);
+                boolean damaged = target.hurt(level.damageSources().playerAttack(player), damage);
                 target.igniteForSeconds(PaxiumSwordItem.IGNITE_SECONDS);
                 if (damaged) {
                     level.playSound(null, target.getX(), target.getY(), target.getZ(),
@@ -240,17 +274,49 @@ public class ModEvents {
             return;
         }
 
+        PaxiumFlightEffects.emit(player);
+
         RandomSource random = level.random;
         AABB box = player.getBoundingBox();
-        double x = box.minX + random.nextDouble() * (box.maxX - box.minX);
-        double y = box.minY + random.nextDouble() * (box.maxY - box.minY);
-        double z = box.minZ + random.nextDouble() * (box.maxZ - box.minZ);
+        double height = box.maxY - box.minY;
 
+        // Your own camera sits inside the bounding box in first person, so anything spawned there
+        // ends up in your face: keep it to small flames around the feet, and no rising smoke.
+        if (PaxiumClientHelper.isLocalFirstPerson(player)) {
+            if (random.nextInt(4) == 0) {
+                Vec3 point = randomPerimeterPoint(box, random, 0.1, box.minY + random.nextDouble() * height * 0.35);
+                level.addParticle(ParticleTypes.SMALL_FLAME, point.x, point.y, point.z, 0.0, 0.0, 0.0);
+            }
+            return;
+        }
+
+        // Seen from outside: a full-body aura on the edge of the body, smoke only from the lower half.
         if (random.nextInt(3) == 0) {
-            level.addParticle(ParticleTypes.FLAME, x, y, z, 0.0, 0.0, 0.0);
+            Vec3 point = randomPerimeterPoint(box, random, 0.05, box.minY + random.nextDouble() * height);
+            level.addParticle(ParticleTypes.FLAME, point.x, point.y, point.z, 0.0, 0.0, 0.0);
         }
         if (random.nextInt(5) == 0) {
-            level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.0, 0.0);
+            Vec3 point = randomPerimeterPoint(box, random, 0.05, box.minY + random.nextDouble() * height * 0.5);
+            level.addParticle(ParticleTypes.SMOKE, point.x, point.y, point.z, 0.0, 0.0, 0.0);
+        }
+    }
+
+    // A point on one of the box's four vertical faces at height y, pushed `outset` outward.
+    private static Vec3 randomPerimeterPoint(AABB box, RandomSource random, double outset, double y) {
+        double t = random.nextDouble();
+        return switch (random.nextInt(4)) {
+            case 0 -> new Vec3(box.minX - outset, y, Mth.lerp(t, box.minZ, box.maxZ));
+            case 1 -> new Vec3(box.maxX + outset, y, Mth.lerp(t, box.minZ, box.maxZ));
+            case 2 -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.minZ - outset);
+            default -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.maxZ + outset);
+        };
+    }
+
+    // The full set cushions every fall, including the one after the Fire Meter runs dry in mid-air.
+    @SubscribeEvent
+    public void onFall(LivingFallEvent event) {
+        if (PaxiumArmor.hasFullSet(event.getEntity())) {
+            event.setCanceled(true);
         }
     }
 
@@ -275,24 +341,85 @@ public class ModEvents {
                     .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
         }
 
+        if (stack.is(ModItems.PAXIUM_INFUSED_CRYSTAL.get())) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.infused_crystal_refine")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
+
+        if (stack.is(ModItems.UNSTABLE_PAXIUM_CHARGE.get()) || stack.is(ModItems.REFINED_PAXIUM_CHARGE.get())) {
+            int stage = stack.is(ModItems.UNSTABLE_PAXIUM_CHARGE.get()) ? 1 : 2;
+            event.getToolTip().add(Component.translatable("tooltip.paxium.charge_stage",
+                            Component.translatable("enchantment.level." + stage), Component.translatable("enchantment.level.3"))
+                    .withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(Component.translatable("tooltip.paxium.charge_refine")
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        }
+
+        if (stack.is(ModBlocks.PAXIUM_BOMB.get().asItem())) {
+            event.getToolTip().add(Component.translatable("tooltip.paxium.bomb_ignite")
+                    .withStyle(ChatFormatting.RED));
+            event.getToolTip().add(Component.translatable("tooltip.paxium.bomb_warning")
+                    .withStyle(ChatFormatting.DARK_RED, ChatFormatting.ITALIC));
+        }
+
         if (stack.getItem() instanceof PaxiumSwordItem) {
             event.getToolTip().add(Component.translatable("tooltip.paxium.sword_ignite")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
             event.getToolTip().add(Component.translatable("tooltip.paxium.sword_fire_beam")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+
+            int level = PaxiumUpgradeStat.BEAM_DAMAGE.getLevel(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.weapon_upgrades").withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.beam_damage", level,
+                    Component.translatable("tooltip.paxium.beam_damage_bonus", Math.round(level * BEAM_DAMAGE_PER_LEVEL))));
         }
 
         if (stack.getItem() instanceof PaxiumBowItem) {
             event.getToolTip().add(Component.translatable("tooltip.paxium.bow_fire_burst")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
+
+            int level = PaxiumUpgradeStat.BLAST.getLevel(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.weapon_upgrades").withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.blast", level,
+                    Component.translatable("tooltip.paxium.blast_bonus",
+                            Math.round(level * PaxiumFireBurstEntity.DAMAGE_PER_LEVEL),
+                            Math.round(level * PaxiumFireBurstEntity.POWER_PER_LEVEL / PaxiumFireBurstEntity.BASE_EXPLOSION_POWER * 100))));
         }
 
         if (stack.getItem() instanceof ArmorItem armorItem && armorItem.getMaterial() == ModArmorMaterials.PAXIUM) {
+            FireMeterUpgrades upgrades = PaxiumArmor.getUpgrades(stack);
+            event.getToolTip().add(Component.translatable("tooltip.paxium.fire_meter_upgrades")
+                    .withStyle(ChatFormatting.GOLD));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.fire_meter_capacity", upgrades.capacity(),
+                    Component.translatable("tooltip.paxium.fire_meter_capacity_bonus",
+                            upgrades.capacity() * ModAttachmentTypes.CAPACITY_PER_LEVEL)));
+            event.getToolTip().add(upgradeLine("tooltip.paxium.fire_meter_recharge", upgrades.recharge(),
+                    Component.translatable("tooltip.paxium.fire_meter_recharge_bonus",
+                            Math.round(upgrades.recharge() * ModAttachmentTypes.RECHARGE_BONUS_PER_LEVEL * 100))));
+
             event.getToolTip().add(Component.translatable("tooltip.paxium.fire_immunity_set_bonus")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
-            event.getToolTip().add(Component.translatable("tooltip.paxium.flight_set_bonus")
+            event.getToolTip().add(Component.translatable("tooltip.paxium.fire_meter_set_bonus")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
         }
+    }
+
+    // "  Capacity  ■■□  II  +50" - filled pips gold, empty pips dark gray, bonus only once upgraded.
+    private static Component upgradeLine(String labelKey, int level, Component bonus) {
+        MutableComponent line = Component.literal("  ")
+                .append(Component.translatable(labelKey).withStyle(ChatFormatting.GRAY))
+                .append(Component.literal("  "))
+                .append(Component.literal("■".repeat(level)).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("□".repeat(PaxiumUpgradeStat.MAX_LEVEL - level)).withStyle(ChatFormatting.DARK_GRAY))
+                .append(Component.literal("  "));
+
+        if (level == 0) {
+            return line.append(Component.literal("-").withStyle(ChatFormatting.DARK_GRAY));
+        }
+
+        return line.append(Component.translatable("enchantment.level." + level).withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal("  "))
+                .append(bonus.copy().withStyle(ChatFormatting.DARK_GRAY));
     }
 
     public static void register(IEventBus eventBus) {

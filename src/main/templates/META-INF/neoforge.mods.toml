@@ -47,6 +47,9 @@ authors="${mod_authors}" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''${mod_description}'''
 
+# Adds the PAXIUM_FIRE_BEAM third-person arm pose for the Paxium Sword's fire beam.
+enumExtensions="META-INF/enumextensions.json"
+
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 #[[mixins]]
 #config="${mod_id}.mixins.json"

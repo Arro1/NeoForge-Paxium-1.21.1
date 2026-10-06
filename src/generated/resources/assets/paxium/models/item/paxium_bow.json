@@ -70,7 +70,23 @@
       ]
     }
   },
+  "loader": "neoforge:item_layers",
+  "neoforge_data": {
+    "layers": {
+      "1": {
+        "ambient_occlusion": false,
+        "block_light": 15,
+        "sky_light": 15
+      }
+    }
+  },
   "overrides": [
+    {
+      "model": "paxium:item/paxium_bow_cooldown",
+      "predicate": {
+        "paxium:on_cooldown": 1.0
+      }
+    },
     {
       "model": "paxium:item/paxium_bow_pulling_0",
       "predicate": {
@@ -93,6 +109,7 @@
     }
   ],
   "textures": {
-    "layer0": "paxium:item/paxium_bow"
+    "layer0": "paxium:item/paxium_bow",
+    "layer1": "paxium:item/paxium_bow_glow"
   }
 }

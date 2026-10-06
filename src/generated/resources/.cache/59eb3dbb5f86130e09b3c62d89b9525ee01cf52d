@@ -1,3 +1,4 @@
-// 1.21.1	2025-10-15T21:49:35.4693946	Loot Tables
+// 1.21.1	2026-10-06T00:28:10.5278676	Loot Tables
 be91c098691a312b0587d36dc35a03ba2b08dc39 data/paxium/loot_table/blocks/deepslate_paxium_ore.json
+7689687425bc0b7149c597c3c351b0e04c7a9f6c data/paxium/loot_table/blocks/paxium_bomb.json
 da495300ae985ed84067f1c915681e4154f62590 data/paxium/loot_table/blocks/starforge.json

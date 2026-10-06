@@ -1,0 +1,13 @@
+{
+  "type": "paxium:armor_upgrade_smithing",
+  "addition": {
+    "item": "paxium:paxium"
+  },
+  "base": {
+    "item": "paxium:paxium_sword"
+  },
+  "stat": "beam_damage",
+  "template": {
+    "item": "paxium:paxium_beam_damage_upgrade_smithing_template"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "paxium:armor_upgrade_smithing",
+  "addition": {
+    "item": "paxium:paxium"
+  },
+  "base": [
+    {
+      "item": "paxium:paxium_helmet"
+    },
+    {
+      "item": "paxium:paxium_chestplate"
+    },
+    {
+      "item": "paxium:paxium_leggings"
+    },
+    {
+      "item": "paxium:paxium_boots"
+    }
+  ],
+  "stat": "recharge",
+  "template": {
+    "item": "paxium:paxium_recharge_upgrade_smithing_template"
+  }
+}

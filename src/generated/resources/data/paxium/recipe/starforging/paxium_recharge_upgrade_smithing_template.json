@@ -1,0 +1,16 @@
+{
+  "type": "paxium:starforging",
+  "base": {
+    "item": "minecraft:amethyst_shard"
+  },
+  "dragon_breath": {
+    "item": "minecraft:dragon_breath"
+  },
+  "nether_star": {
+    "item": "minecraft:nether_star"
+  },
+  "result": {
+    "count": 1,
+    "id": "paxium:paxium_recharge_upgrade_smithing_template"
+  }
+}

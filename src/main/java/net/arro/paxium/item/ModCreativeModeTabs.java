@@ -32,6 +32,16 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.PAXIUM_BOOTS.get());
                         output.accept(ModItems.PAXIUM_SWORD.get());
                         output.accept(ModItems.PAXIUM_BOW.get());
+
+                        output.accept(ModItems.PAXIUM_CAPACITY_UPGRADE_SMITHING_TEMPLATE.get());
+                        output.accept(ModItems.PAXIUM_RECHARGE_UPGRADE_SMITHING_TEMPLATE.get());
+                        output.accept(ModItems.PAXIUM_BEAM_DAMAGE_UPGRADE_SMITHING_TEMPLATE.get());
+                        output.accept(ModItems.PAXIUM_BLAST_UPGRADE_SMITHING_TEMPLATE.get());
+
+                        output.accept(ModItems.PAXIUM_INFUSED_CRYSTAL.get());
+                        output.accept(ModItems.UNSTABLE_PAXIUM_CHARGE.get());
+                        output.accept(ModItems.REFINED_PAXIUM_CHARGE.get());
+                        output.accept(ModBlocks.PAXIUM_BOMB.get());
                     })
                     .build());
 

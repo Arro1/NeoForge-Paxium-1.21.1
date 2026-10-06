@@ -1,0 +1,17 @@
+{
+  "parent": "minecraft:item/generated",
+  "loader": "neoforge:item_layers",
+  "neoforge_data": {
+    "layers": {
+      "1": {
+        "ambient_occlusion": false,
+        "block_light": 15,
+        "sky_light": 15
+      }
+    }
+  },
+  "textures": {
+    "layer0": "paxium:item/paxium_recharge_upgrade_smithing_template",
+    "layer1": "paxium:item/paxium_recharge_upgrade_smithing_template_glow"
+  }
+}

@@ -1,6 +1,7 @@
 package net.arro.paxium.item.custom;
 
 import net.arro.paxium.attachment.ModAttachmentTypes;
+import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
 import net.arro.paxium.util.PaxiumArmor;
 import net.minecraft.server.level.ServerLevel;
@@ -15,11 +16,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-// Draws and fires like a vanilla bow, but needs no arrows: releasing a full draw spends half of
-// the shared Paxium fire-charge meter (see ModAttachmentTypes.FLIGHT_FUEL_TICKS) on a single
-// explosive PaxiumFireBurstEntity instead.
+// Draws and fires like a vanilla bow, but needs no arrows: releasing a full draw spends a fixed chunk
+// of the shared Fire Meter (see ModAttachmentTypes.FIRE_METER) - half of an unupgraded meter - on a
+// single explosive PaxiumFireBurstEntity instead. Capacity upgrades therefore mean more shots.
 public class PaxiumBowItem extends BowItem {
-    private static final int FIRE_BURST_FUEL_COST = ModAttachmentTypes.MAX_FLIGHT_FUEL_TICKS / 2;
+    private static final float FIRE_BURST_METER_COST = ModAttachmentTypes.BASE_FIRE_METER_CAPACITY / 2.0F;
     private static final int FIRE_COOLDOWN_TICKS = 40;
     private static final float PROJECTILE_VELOCITY = 2.5F;
     private static final float MIN_POWER_TO_FIRE = 0.1F;
@@ -40,7 +41,7 @@ public class PaxiumBowItem extends BowItem {
             return InteractionResultHolder.pass(stack);
         }
 
-        if (!player.isCreative() && player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get()) < FIRE_BURST_FUEL_COST) {
+        if (!player.isCreative() && player.getData(ModAttachmentTypes.FIRE_METER.get()) < FIRE_BURST_METER_COST) {
             return InteractionResultHolder.fail(stack);
         }
 
@@ -62,16 +63,17 @@ public class PaxiumBowItem extends BowItem {
         }
 
         if (!player.isCreative()) {
-            int fuel = player.getData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get());
-            if (fuel < FIRE_BURST_FUEL_COST) {
+            float meter = player.getData(ModAttachmentTypes.FIRE_METER.get());
+            if (meter < FIRE_BURST_METER_COST) {
                 return;
             }
-            player.setData(ModAttachmentTypes.FLIGHT_FUEL_TICKS.get(), fuel - FIRE_BURST_FUEL_COST);
+            player.setData(ModAttachmentTypes.FIRE_METER.get(), meter - FIRE_BURST_METER_COST);
         }
 
         if (level instanceof ServerLevel serverLevel) {
+            // Blast upgrades raise damage and radius only - the meter cost above stays fixed.
             PaxiumFireBurstEntity burst = new PaxiumFireBurstEntity(player, serverLevel,
-                    player.getX(), player.getEyeY(), player.getZ());
+                    player.getX(), player.getEyeY(), player.getZ(), PaxiumUpgradeStat.BLAST.getLevel(stack));
             burst.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, PROJECTILE_VELOCITY, 1.0F);
             serverLevel.addFreshEntity(burst);
         }

@@ -13,20 +13,20 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
 public class StarforgeRecipe implements Recipe<StarforgeRecipeInput> {
-    private final Ingredient paxium;
+    private final Ingredient base;
     private final Ingredient dragonBreath;
     private final Ingredient netherStar;
     private final ItemStack result;
 
-    public StarforgeRecipe(Ingredient paxium, Ingredient dragonBreath, Ingredient netherStar, ItemStack result) {
-        this.paxium = paxium;
+    public StarforgeRecipe(Ingredient base, Ingredient dragonBreath, Ingredient netherStar, ItemStack result) {
+        this.base = base;
         this.dragonBreath = dragonBreath;
         this.netherStar = netherStar;
         this.result = result;
     }
 
-    public Ingredient getPaxium() {
-        return paxium;
+    public Ingredient getBase() {
+        return base;
     }
 
     public Ingredient getDragonBreath() {
@@ -39,7 +39,7 @@ public class StarforgeRecipe implements Recipe<StarforgeRecipeInput> {
 
     @Override
     public boolean matches(StarforgeRecipeInput input, Level level) {
-        return paxium.test(input.paxium()) && dragonBreath.test(input.dragonBreath()) && netherStar.test(input.netherStar());
+        return base.test(input.base()) && dragonBreath.test(input.dragonBreath()) && netherStar.test(input.netherStar());
     }
 
     @Override
@@ -70,7 +70,7 @@ public class StarforgeRecipe implements Recipe<StarforgeRecipeInput> {
     public static class Serializer implements RecipeSerializer<StarforgeRecipe> {
         public static final MapCodec<StarforgeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
                 instance.group(
-                        Ingredient.CODEC.fieldOf("paxium").forGetter(StarforgeRecipe::getPaxium),
+                        Ingredient.CODEC.fieldOf("base").forGetter(StarforgeRecipe::getBase),
                         Ingredient.CODEC.fieldOf("dragon_breath").forGetter(StarforgeRecipe::getDragonBreath),
                         Ingredient.CODEC.fieldOf("nether_star").forGetter(StarforgeRecipe::getNetherStar),
                         ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result)
@@ -78,7 +78,7 @@ public class StarforgeRecipe implements Recipe<StarforgeRecipeInput> {
         );
 
         public static final StreamCodec<RegistryFriendlyByteBuf, StarforgeRecipe> STREAM_CODEC = StreamCodec.composite(
-                Ingredient.CONTENTS_STREAM_CODEC, StarforgeRecipe::getPaxium,
+                Ingredient.CONTENTS_STREAM_CODEC, StarforgeRecipe::getBase,
                 Ingredient.CONTENTS_STREAM_CODEC, StarforgeRecipe::getDragonBreath,
                 Ingredient.CONTENTS_STREAM_CODEC, StarforgeRecipe::getNetherStar,
                 ItemStack.STREAM_CODEC, recipe -> recipe.result,
