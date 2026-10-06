@@ -30,6 +30,14 @@ public class ModAttachmentTypes {
                     .sync((holder, to) -> holder == to, ByteBufCodecs.FLOAT)
                     .build());
 
+    // True while the player is flying in the Paxium armor. Synced to every tracking client (unlike the
+    // Fire Meter) so other players see the flight effects; not saved, a fresh login starts grounded.
+    public static final Supplier<AttachmentType<Boolean>> FLYING = ATTACHMENT_TYPES.register(
+            "flying",
+            () -> AttachmentType.builder(() -> false)
+                    .sync(ByteBufCodecs.BOOL)
+                    .build());
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

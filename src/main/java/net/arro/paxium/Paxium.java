@@ -8,7 +8,9 @@ import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
 import net.arro.paxium.client.PaxiumArmPoses;
 import net.arro.paxium.client.render.PaxiumArmorGlowLayer;
+import net.arro.paxium.client.particle.FlightFlameParticle;
 import net.arro.paxium.glow.ModGlow;
+import net.arro.paxium.particle.ModParticles;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -51,6 +53,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -109,6 +112,7 @@ public class Paxium {
         ModEntities.register(modEventBus);
 
         ModAttachmentTypes.register(modEventBus);
+        ModParticles.register(modEventBus);
 
         ModMenuTypes.register(modEventBus);
 
@@ -165,6 +169,11 @@ public class Paxium {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.STARFORGE_MENU.get(), StarforgeScreen::new);
+        }
+
+        @SubscribeEvent
+        public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
+            event.registerSpriteSet(ModParticles.FLIGHT_FLAME.get(), FlightFlameParticle.Provider::new);
         }
 
         @SubscribeEvent

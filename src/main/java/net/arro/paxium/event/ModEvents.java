@@ -5,6 +5,7 @@ import net.arro.paxium.attachment.ModAttachmentTypes;
 import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.item.ModItems;
 import net.arro.paxium.client.PaxiumClientHelper;
+import net.arro.paxium.client.PaxiumFlightEffects;
 import net.arro.paxium.component.FireMeterUpgrades;
 import net.arro.paxium.component.PaxiumUpgradeStat;
 import net.arro.paxium.entity.custom.PaxiumFireBurstEntity;
@@ -79,6 +80,8 @@ public class ModEvents {
             // Creative already has free flight/immortality; only the beam matters here, and it
             // should fire indefinitely without touching the Fire Meter at all.
             updateFireBeamCreative(player);
+            // Vanilla creative flight, but the armor's wings should still show.
+            setFlying(player, PaxiumArmor.hasFullSet(player) && player.getAbilities().flying);
             return;
         }
 
@@ -93,6 +96,7 @@ public class ModEvents {
         }
 
         setFlightAllowed(player, false);
+        setFlying(player, false);
         stopFireBeamIfChanneling(player);
 
         for (ItemStack stack : player.getInventory().items) {
@@ -132,6 +136,14 @@ public class ModEvents {
         }
 
         setFlightAllowed(player, updatedMeter > 0.0F);
+        setFlying(player, player.getAbilities().flying);
+    }
+
+    // Only writes on change, so the attachment sync packet is sent when flight starts or stops, not every tick.
+    private static void setFlying(Player player, boolean flying) {
+        if (player.getData(ModAttachmentTypes.FLYING.get()) != flying) {
+            player.setData(ModAttachmentTypes.FLYING.get(), flying);
+        }
     }
 
     private static void setFlightAllowed(Player player, boolean allowed) {
@@ -254,6 +266,8 @@ public class ModEvents {
         if (player.isSpectator() || !PaxiumArmor.hasFullSet(player)) {
             return;
         }
+
+        PaxiumFlightEffects.emit(player);
 
         RandomSource random = level.random;
         AABB box = player.getBoundingBox();
