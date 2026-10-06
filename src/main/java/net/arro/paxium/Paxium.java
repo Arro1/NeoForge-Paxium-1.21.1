@@ -7,7 +7,19 @@ import net.arro.paxium.block.ModBlocks;
 import net.arro.paxium.block.entity.ModBlockEntities;
 import net.arro.paxium.block.entity.renderer.StarforgeBlockEntityRenderer;
 import net.arro.paxium.client.PaxiumArmPoses;
+import net.arro.paxium.client.render.PaxiumArmorGlowLayer;
+import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.ArmorStandRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.SkeletonRenderer;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.arro.paxium.component.ModDataComponents;
@@ -161,6 +173,35 @@ public class Paxium {
             event.registerEntityRenderer(ModEntities.PRIMED_PAXIUM_BOMB.get(), PrimedPaxiumBombRenderer::new);
             event.registerEntityRenderer(ModEntities.PAXIUM_BLAST.get(), PaxiumBlastRenderer::new);
             event.registerBlockEntityRenderer(ModBlockEntities.STARFORGE_BE.get(), StarforgeBlockEntityRenderer::new);
+        }
+
+        // Glowing, animated fire veins on worn Paxium armor (players, armor stands, armored zombies/skeletons).
+        @SubscribeEvent
+        public static void addArmorGlowLayers(EntityRenderersEvent.AddLayers event) {
+            EntityModelSet models = event.getEntityModels();
+
+            for (PlayerSkin.Model skin : event.getSkins()) {
+                if (event.getSkin(skin) instanceof PlayerRenderer renderer) {
+                    addGlowLayer(renderer, models, ModelLayers.PLAYER_INNER_ARMOR, ModelLayers.PLAYER_OUTER_ARMOR);
+                }
+            }
+            if (event.getRenderer(EntityType.ARMOR_STAND) instanceof ArmorStandRenderer renderer) {
+                renderer.addLayer(new PaxiumArmorGlowLayer<>(renderer,
+                        new ArmorStandArmorModel(models.bakeLayer(ModelLayers.ARMOR_STAND_INNER_ARMOR)),
+                        new ArmorStandArmorModel(models.bakeLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR))));
+            }
+            if (event.getRenderer(EntityType.ZOMBIE) instanceof ZombieRenderer renderer) {
+                addGlowLayer(renderer, models, ModelLayers.ZOMBIE_INNER_ARMOR, ModelLayers.ZOMBIE_OUTER_ARMOR);
+            }
+            if (event.getRenderer(EntityType.SKELETON) instanceof SkeletonRenderer renderer) {
+                addGlowLayer(renderer, models, ModelLayers.SKELETON_INNER_ARMOR, ModelLayers.SKELETON_OUTER_ARMOR);
+            }
+        }
+
+        private static <T extends LivingEntity, M extends HumanoidModel<T>> void addGlowLayer(
+                LivingEntityRenderer<T, M> renderer, EntityModelSet models, ModelLayerLocation inner, ModelLayerLocation outer) {
+            renderer.addLayer(new PaxiumArmorGlowLayer<>(renderer,
+                    new HumanoidModel<T>(models.bakeLayer(inner)), new HumanoidModel<T>(models.bakeLayer(outer))));
         }
 
         // Vanilla only wires the "pulling"/"pull" item-property functions to the literal Items.BOW
