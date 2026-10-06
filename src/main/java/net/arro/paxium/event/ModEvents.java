@@ -41,6 +41,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -120,7 +121,7 @@ public class ModEvents {
         if (player.getAbilities().flying) {
             updatedMeter = Math.max(0.0F, updatedMeter - 1.0F);
             AWAITING_LANDING.add(id);
-        } else if (AWAITING_LANDING.contains(id) && !player.onGround()) {
+        } else if (AWAITING_LANDING.contains(id) && !hasLanded(player)) {
             // Still falling after flight ended - hold off on regenerating until they land.
         } else {
             AWAITING_LANDING.remove(id);
@@ -144,6 +145,12 @@ public class ModEvents {
         if (player.getData(ModAttachmentTypes.FLYING.get()) != flying) {
             player.setData(ModAttachmentTypes.FLYING.get(), flying);
         }
+    }
+
+    // onGround() alone never turns true in water, on ladders/vines or on a mount, which used to freeze the
+    // recharge forever after flying over those.
+    private static boolean hasLanded(Player player) {
+        return player.onGround() || player.isInWater() || player.onClimbable() || player.isPassenger();
     }
 
     private static void setFlightAllowed(Player player, boolean allowed) {
@@ -303,6 +310,14 @@ public class ModEvents {
             case 2 -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.minZ - outset);
             default -> new Vec3(Mth.lerp(t, box.minX, box.maxX), y, box.maxZ + outset);
         };
+    }
+
+    // The full set cushions every fall, including the one after the Fire Meter runs dry in mid-air.
+    @SubscribeEvent
+    public void onFall(LivingFallEvent event) {
+        if (PaxiumArmor.hasFullSet(event.getEntity())) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
