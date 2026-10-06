@@ -244,7 +244,7 @@ public class Paxium {
 
         private static boolean isFireMeterBarShown() {
             Player player = Minecraft.getInstance().player;
-            return player != null && PaxiumArmor.hasFullSet(player);
+            return player != null && !player.isSpectator() && PaxiumArmor.hasFullSet(player);
         }
 
         private static void renderFireMeterBar(GuiGraphics guiGraphics) {
