@@ -37,6 +37,8 @@ public class DataGenerators {
         //generator.addProvider(event.includeServer(), new ModDataMapProvider(packOutput, lookupProvider));
 
 
+        // Must come first: it registers the generated glow textures with the file helper for the model providers.
+        generator.addProvider(event.includeClient(), new GlowTextureProvider(packOutput, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModItemModelProvider(packOutput, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModBlockStateProvider(packOutput, existingFileHelper));
 

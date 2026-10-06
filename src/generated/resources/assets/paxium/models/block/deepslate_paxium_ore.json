@@ -1,6 +1,97 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#side"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#side"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#side"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#top"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#side"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom_glow"
+        },
+        "east": {
+          "cullface": "east",
+          "texture": "#side_glow"
+        },
+        "north": {
+          "cullface": "north",
+          "texture": "#side_glow"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#side_glow"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#top_glow"
+        },
+        "west": {
+          "cullface": "west",
+          "texture": "#side_glow"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "neoforge_data": {
+        "ambient_occlusion": false,
+        "block_light": 15,
+        "sky_light": 15
+      },
+      "shade": false,
+      "to": [
+        16,
+        16,
+        16
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
   "textures": {
-    "all": "paxium:block/deepslate_paxium_ore"
+    "bottom": "paxium:block/deepslate_paxium_ore",
+    "bottom_glow": "paxium:block/deepslate_paxium_ore_glow",
+    "particle": "paxium:block/deepslate_paxium_ore",
+    "side": "paxium:block/deepslate_paxium_ore",
+    "side_glow": "paxium:block/deepslate_paxium_ore_glow",
+    "top": "paxium:block/deepslate_paxium_ore",
+    "top_glow": "paxium:block/deepslate_paxium_ore_glow"
   }
 }

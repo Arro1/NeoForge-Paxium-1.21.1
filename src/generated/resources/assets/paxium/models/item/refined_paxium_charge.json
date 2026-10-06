@@ -1,6 +1,17 @@
 {
   "parent": "minecraft:item/generated",
+  "loader": "neoforge:item_layers",
+  "neoforge_data": {
+    "layers": {
+      "1": {
+        "ambient_occlusion": false,
+        "block_light": 15,
+        "sky_light": 15
+      }
+    }
+  },
   "textures": {
-    "layer0": "paxium:item/refined_paxium_charge"
+    "layer0": "paxium:item/refined_paxium_charge",
+    "layer1": "paxium:item/refined_paxium_charge_glow"
   }
 }
